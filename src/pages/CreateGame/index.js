@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import View from './view';
+import { navigate } from '@reach/router';
 
 export default () => {
   const [name, setName] = useState('');
@@ -10,6 +11,7 @@ export default () => {
     if (canCreateGame) {
       alert(`Creating game with player: ${name}`);
       setName('');
+      navigate(`/games/${name}`);
     }
   }, [canCreateGame, name]);
 
