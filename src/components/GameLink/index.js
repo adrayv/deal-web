@@ -5,7 +5,7 @@ export default ({ gameId }) => {
   return (
     <View
       onCopy={() => alert('copied!')}
-      gameUrl={`https://some-url.com/${gameId}`}
+      gameUrl={`${process.env.REACT_APP_GAME_URL}/join-game/${gameId}`}
     />
   );
 };

@@ -6,6 +6,8 @@ import JoinGameInfo from 'pages/JoinGameInfo';
 import CreateGame from 'pages/CreateGame';
 import GameLobbyRouter from 'components/GameLobbyRouter';
 import RootContextProvider from 'RootContextProvider';
+import RootEffects from 'RootEffects';
+import JoinGameFromLink from 'pages/JoinGameFromLink';
 
 function App() {
   return (
@@ -16,7 +18,9 @@ function App() {
         <JoinGameInfo path="join-info" />
         <CreateGame path="/create" />
         <GameLobbyRouter path="/games/:gameId" />
+        <JoinGameFromLink path="/join-game/:gameId" />
       </Router>
+      <RootEffects />
     </RootContextProvider>
   );
 }

@@ -1,13 +1,14 @@
 import React from 'react';
 import Game from 'pages/Game';
 import Lobby from 'pages/Lobby';
-import useTempState from 'hooks/useTempState';
+import useGameState from 'hooks/useGameState';
 
 export default ({ gameId }) => {
-  const { gameStarted } = useTempState();
-  if (gameStarted) {
+  const { state } = useGameState();
+  if (state && state.status === 'in-progress') {
     return <Game gameId={gameId} />;
   } else {
     return <Lobby gameId={gameId} />;
   }
+  // <Error Accessing this Game/>
 };

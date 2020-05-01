@@ -1,4 +1,9 @@
 import React from 'react';
-import { TempProvider } from 'hooks/useTempState';
+import { LocationProvider } from '@reach/router';
+import { GameStateProvider } from 'hooks/useGameState';
 
-export default ({ children }) => <TempProvider>{children}</TempProvider>;
+export default ({ children }) => (
+  <LocationProvider>
+    <GameStateProvider>{children}</GameStateProvider>
+  </LocationProvider>
+);
