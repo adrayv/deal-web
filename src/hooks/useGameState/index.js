@@ -1,6 +1,6 @@
 import React, { useContext, createContext, useState, useEffect } from 'react';
 import db from 'services/firebase/firestore';
-import { useMatch } from '@reach/router';
+import { useMatch, navigate } from '@reach/router';
 import { getSaveToken } from 'services/save-token';
 
 const Context = createContext();
@@ -21,13 +21,25 @@ export const GameStateProvider = ({ children }) => {
         return db
           .collection('games')
           .doc(gameId)
-          .onSnapshot(doc => {
-            const state = doc.data();
-            if (state && state.players[saveToken.playerId]) {
-              setPlayerId(saveToken.playerId);
-              setGameState(doc.data());
+          .onSnapshot(
+            doc => {
+              const state = doc.data();
+              if (state && state.players[saveToken.playerId]) {
+                setPlayerId(saveToken.playerId);
+                setGameState(doc.data());
+              } else {
+                alert('There was an issue joining this game');
+                navigate('/');
+              }
+            },
+            err => {
+              console.error('ISSUE JOINING GAME', err);
+              alert('Issue joining this game');
+              navigate('/');
             }
-          });
+          );
+      } else {
+        navigate(`/join-game/${gameId}`);
       }
     }
   }, [gameId]);

@@ -1,14 +1,15 @@
 import React, { useCallback } from 'react';
 import View from './view';
+import { startGame } from 'services/game';
 
 export default ({ gameId }) => {
   const canStartGame = true;
 
   const startGameHandler = useCallback(() => {
     if (canStartGame) {
-      alert('starting game');
+      startGame(gameId);
     }
-  }, [canStartGame]);
+  }, [canStartGame, gameId]);
 
   return (
     <View

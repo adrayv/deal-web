@@ -1,3 +1,4 @@
+import db from 'services/firebase/firestore';
 import request from 'superagent';
 
 export const createGame = async player => {
@@ -19,4 +20,10 @@ export const joinGame = async (gameId, player) => {
         player,
       })
   ).body;
+};
+
+export const startGame = async gameId => {
+  await db
+    .collection('commands')
+    .add({ gameId, type: '@start-game', payload: {} });
 };
