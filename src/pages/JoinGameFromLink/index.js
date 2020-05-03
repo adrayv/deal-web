@@ -2,11 +2,13 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { getSaveToken, storeSaveToken } from 'services/save-token';
 import { navigate } from '@reach/router';
 import View from './view';
-import { joinGame } from 'services/game';
+import { getGameById, pushGameState } from 'services/game';
+import { Player } from 'game/entities';
+import { canJoinGame, actionCreators, reducer } from 'game/core';
 
 export default ({ gameId }) => {
   const [name, setName] = useState('');
-  const canJoinGame = Boolean(name);
+  const canSubmit = Boolean(name);
 
   useEffect(() => {
     const saveToken = getSaveToken();
@@ -17,23 +19,35 @@ export default ({ gameId }) => {
 
   const joinGameHandler = useCallback(async () => {
     try {
-      if (canJoinGame) {
-        const { playerId } = await joinGame(gameId, name);
-        storeSaveToken(gameId, playerId);
+      if (canSubmit) {
         setName('');
-        navigate(`/games/${gameId}`);
+        const player = Player(name);
+        const gameToJoin = await getGameById(gameId);
+        if (canJoinGame(gameToJoin)) {
+          const newGameState = reducer(
+            gameToJoin,
+            actionCreators.joinGame(player)
+          );
+          await pushGameState(gameId, newGameState);
+          storeSaveToken(gameId, player.id);
+          setTimeout(() => {
+            navigate(`/games/${gameId}`);
+          }, 1000);
+        } else {
+          throw new Error('Cannot join game');
+        }
       }
     } catch (err) {
       console.error('ERROR JOINING GAME', err);
       alert('Issue joining game');
     }
-  }, [name, canJoinGame, gameId]);
+  }, [name, canSubmit, gameId]);
 
   return (
     <View
       value={name}
       onNameChange={setName}
-      canJoinGame={canJoinGame}
+      canJoinGame={canSubmit}
       onJoinGame={joinGameHandler}
     />
   );

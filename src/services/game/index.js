@@ -1,25 +1,17 @@
 import db from 'services/firebase/firestore';
-import request from 'superagent';
 
-export const createGame = async player => {
-  return (
-    await request
-      .post(`${process.env.REACT_APP_FIREBASE_FUNCTIONS_URL}/createGame`)
-      .send({
-        player,
-      })
-  ).body;
+export const createGame = async state => {
+  const { id } = await db.collection('games').add(state);
+  return id;
 };
 
-export const joinGame = async (gameId, player) => {
-  return (
-    await request
-      .post(`${process.env.REACT_APP_FIREBASE_FUNCTIONS_URL}/joinGame`)
-      .send({
-        gameId,
-        player,
-      })
-  ).body;
+export const getGameById = async gameId => {
+  const game = await db.collection('games').doc(gameId).get();
+  return game.data();
+};
+
+export const pushGameState = async (gameId, gameState) => {
+  await db.collection('games').doc(gameId).set(gameState);
 };
 
 export const startGame = async gameId => {

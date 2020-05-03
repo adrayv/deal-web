@@ -3,6 +3,8 @@ import View from './view';
 import { navigate } from '@reach/router';
 import { createGame } from 'services/game';
 import { storeSaveToken } from 'services/save-token';
+import { Player } from 'game/entities';
+import { createInitialGameState } from 'game/core';
 
 export default () => {
   const [name, setName] = useState('');
@@ -12,8 +14,10 @@ export default () => {
   const createGameHandler = useCallback(async () => {
     try {
       if (canCreateGame) {
-        const { gameId, playerId } = await createGame(name);
-        storeSaveToken(gameId, playerId);
+        const initialPlayer = Player(name);
+        const initialState = createInitialGameState(initialPlayer);
+        const gameId = await createGame(initialState);
+        storeSaveToken(gameId, initialPlayer.id);
         setName('');
         navigate(`/games/${gameId}`);
       }

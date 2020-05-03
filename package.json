@@ -8,11 +8,13 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "firebase": "^7.14.2",
+    "lodash": "^4.17.15",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
     "styled-components": "^5.1.0",
-    "superagent": "^5.2.2"
+    "superagent": "^5.2.2",
+    "uniqid": "^5.2.0"
   },
   "prettier": {
     "$schema": "http://json.schemastore.org/prettierrc",
@@ -50,6 +52,17 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "pretty-quick --staged",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "devDependencies": {
     "husky": "^4.2.5",
