@@ -1,20 +1,18 @@
 import React, { useCallback } from 'react';
 import View from './view';
 import useGameState from 'hooks/useGameState';
-import { gameStatuses, reducer, actionCreators } from 'game/core';
-import { pushGameState } from 'services/game';
+import { actionCreators } from 'game/core';
+import usePushAction from 'hooks/usePushAction';
 
 export default ({ gameId }) => {
-  const { state } = useGameState();
-
-  const canStartGame = state && state.status === gameStatuses.ready;
+  const { canStartGame } = useGameState();
+  const { pushAction } = usePushAction();
 
   const startGameHandler = useCallback(() => {
-    if (canStartGame) {
-      const newState = reducer(state, actionCreators.startGame());
-      pushGameState(gameId, newState);
+    if (canStartGame()) {
+      pushAction(actionCreators.startGame());
     }
-  }, [canStartGame, state, gameId]);
+  }, [canStartGame, pushAction]);
 
   return (
     <View

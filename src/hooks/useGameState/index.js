@@ -1,7 +1,14 @@
-import React, { useContext, createContext, useState, useEffect } from 'react';
+import React, {
+  useContext,
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import db from 'services/firebase/firestore';
 import { useMatch, navigate } from '@reach/router';
 import { getSaveToken } from 'services/save-token';
+import { gameStatuses } from 'game/core';
 
 const Context = createContext();
 
@@ -12,6 +19,9 @@ export const GameStateProvider = ({ children }) => {
   const [playerId, setPlayerId] = useState(null);
   const match = useMatch('/games/:gameId');
   const gameId = match && match.gameId;
+  const gameStatus = gameState && gameState.status;
+  const players =
+    gameState && gameState.order.map(pid => gameState.players[pid]);
 
   useEffect(() => {
     if (gameId) {
@@ -44,11 +54,26 @@ export const GameStateProvider = ({ children }) => {
     }
   }, [gameId]);
 
+  const getGameStatus = useCallback(() => gameStatus, [gameStatus]);
+  const getPlayers = useCallback(() => players, [players]);
+  const canStartGame = useCallback(() => gameStatus === gameStatuses.ready, [
+    gameStatus,
+  ]);
+  const gameHasStarted = useCallback(
+    () => gameStatus === gameStatuses.inProgress,
+    [gameStatus]
+  );
+
   return (
     <Provider
       value={{
-        state: gameState,
         playerId,
+        gameId,
+        state: gameState,
+        getGameStatus,
+        getPlayers,
+        canStartGame,
+        gameHasStarted,
       }}
     >
       {children}

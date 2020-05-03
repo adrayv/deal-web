@@ -1,9 +1,12 @@
 import React from 'react';
 import { LocationProvider } from '@reach/router';
 import { GameStateProvider } from 'hooks/useGameState';
+import { PushedActionsProvider } from 'hooks/usePushAction';
 
 export default ({ children }) => (
   <LocationProvider>
-    <GameStateProvider>{children}</GameStateProvider>
+    <PushedActionsProvider>
+      <GameStateProvider>{children}</GameStateProvider>
+    </PushedActionsProvider>
   </LocationProvider>
 );
