@@ -1,4 +1,4 @@
-var _ = require('lodash');
+import _ from 'lodash';
 
 const types = {
   cash: {
@@ -170,7 +170,7 @@ const types = {
   },
 };
 
-module.exports.generateDeck = () => {
+export const generateDeck = () => {
   const makeTypes = ([type, data]) => {
     if (type === 'cash') {
       return Object.entries(data).map(([denomination, count]) => {
