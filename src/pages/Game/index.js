@@ -1,12 +1,22 @@
 import React from 'react';
-import useGameState from 'hooks/useGameState';
+import styled from 'styled-components';
+import OtherPlayerList from 'components/OtherPlayerList';
+import MainPlayer from 'components/MainPlayer';
 
-export default ({ gameId }) => {
-  const { state } = useGameState();
+const GameLayout = styled.div`
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template: 1fr 2fr / 1fr;
+  justify-items: center;
+  background: #fefefe;
+`;
+
+export default () => {
   return (
-    <>
-      <h1>Game ID: {gameId}</h1>
-      <p>{JSON.stringify(state)}</p>
-    </>
+    <GameLayout>
+      <OtherPlayerList />
+      <MainPlayer />
+    </GameLayout>
   );
 };

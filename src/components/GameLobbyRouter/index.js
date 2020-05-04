@@ -6,7 +6,7 @@ import useGameState from 'hooks/useGameState';
 export default ({ gameId }) => {
   const { gameHasStarted } = useGameState();
   if (gameHasStarted()) {
-    return <Game gameId={gameId} />;
+    return <Game />;
   } else {
     return <Lobby gameId={gameId} />;
   }

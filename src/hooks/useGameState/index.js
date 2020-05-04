@@ -22,6 +22,13 @@ export const GameStateProvider = ({ children }) => {
   const gameStatus = gameState && gameState.status;
   const players =
     gameState && gameState.order.map(pid => gameState.players[pid]);
+  const otherPlayerIds =
+    gameState &&
+    gameState.order &&
+    playerId &&
+    gameState.order.filter(pid => pid !== playerId);
+  const mainPlayer = gameState && playerId && gameState.players[playerId];
+  const currentPlayer = gameState && gameState.order[gameState.turn];
 
   useEffect(() => {
     if (gameId) {
@@ -63,6 +70,16 @@ export const GameStateProvider = ({ children }) => {
     () => gameStatus === gameStatuses.inProgress,
     [gameStatus]
   );
+  const getOtherPlayerIds = useCallback(() => otherPlayerIds, [otherPlayerIds]);
+  const getPlayerById = useCallback(
+    id => players.find(player => player.id === id),
+    [players]
+  );
+  const getMainPlayer = useCallback(() => mainPlayer, [mainPlayer]);
+  const isMainPlayersTurn = useCallback(() => currentPlayer === playerId, [
+    currentPlayer,
+    playerId,
+  ]);
 
   return (
     <Provider
@@ -72,8 +89,12 @@ export const GameStateProvider = ({ children }) => {
         state: gameState,
         getGameStatus,
         getPlayers,
+        getPlayerById,
         canStartGame,
         gameHasStarted,
+        getOtherPlayerIds,
+        getMainPlayer,
+        isMainPlayersTurn,
       }}
     >
       {children}
