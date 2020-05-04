@@ -1,4 +1,4 @@
-module.exports.shuffle = function (arr) {
+export const shuffle = function (arr) {
   let array = [...arr];
   var currentIndex = array.length,
     temporaryValue,
