@@ -1,26 +1,22 @@
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
 import View from './view';
 import useGameState from 'hooks/useGameState';
 import useModal from 'hooks/useModal';
 import ViewMainPlayerHand from 'components/ViewMainPlayerHand';
 import ViewMainPlayerCash from 'components/ViewMainPlayerCash';
 import PlayCashCard from 'components/PlayCashCard';
-
-const Temp = styled.div`
-  width: 300px;
-  height: 200px;
-  background: red;
-`;
+import usePushAction from 'hooks/usePushAction';
+import { actionCreators } from 'game/core';
 
 export default () => {
   const { setComponent } = useModal();
-  const { getMainPlayer } = useGameState();
+  const { getMainPlayer, playerId } = useGameState();
   const mainPlayer = getMainPlayer();
+  const { pushAction } = usePushAction();
 
   const endTurnHandler = useCallback(() => {
-    setComponent(<Temp />);
-  }, [setComponent]);
+    pushAction(actionCreators.endTurn(playerId));
+  }, [playerId, pushAction]);
 
   const viewHandHandler = useCallback(() => {
     setComponent(<ViewMainPlayerHand />);
