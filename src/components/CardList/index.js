@@ -3,6 +3,7 @@ import { Card } from 'antd';
 import styled from 'styled-components';
 import CashCard from 'components/CashCard';
 import PropertyCard from 'components/PropertyCard';
+import SetCard from 'components/SetCard';
 
 const Layout = styled.div`
   & > * {
@@ -20,12 +21,20 @@ export default ({ title, cards }) => (
       {cards.map(card => {
         if (card.type === 'cash') {
           return <CashCard value={card.value} />;
-        } else {
+        } else if (card.type === 'property') {
           return (
             <PropertyCard
               value={card.value}
               name={card.name}
               color={card.color}
+            />
+          );
+        } else {
+          return (
+            <SetCard
+              color={card.color}
+              isComplete={card.complete}
+              cards={card.cards}
             />
           );
         }

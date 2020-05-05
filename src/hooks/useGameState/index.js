@@ -19,23 +19,6 @@ export const GameStateProvider = ({ children }) => {
   const [playerId, setPlayerId] = useState(null);
   const match = useMatch('/games/:gameId');
   const gameId = match && match.gameId;
-  const gameStatus = gameState && gameState.status;
-  const players =
-    gameState && gameState.order.map(pid => gameState.players[pid]);
-  const otherPlayerIds =
-    gameState &&
-    gameState.order &&
-    playerId &&
-    gameState.order.filter(pid => pid !== playerId);
-  const mainPlayer = gameState && playerId && gameState.players[playerId];
-  const mainPlayerHand = mainPlayer && mainPlayer.hand;
-  const mainPlayerCash = mainPlayer && mainPlayer.cash;
-  const mainPlayerHandCash =
-    mainPlayerHand && mainPlayerHand.filter(card => card.type === 'cash');
-  const mainPlayerHandProperties =
-    mainPlayerHand && mainPlayerHand.filter(card => card.type === 'property');
-  const mainPlayerSets = mainPlayer && mainPlayer.sets;
-  const currentPlayer = gameState && gameState.order[gameState.turn];
 
   useEffect(() => {
     if (gameId) {
@@ -67,6 +50,24 @@ export const GameStateProvider = ({ children }) => {
       }
     }
   }, [gameId]);
+
+  const gameStatus = gameState && gameState.status;
+  const players =
+    gameState && gameState.order.map(pid => gameState.players[pid]);
+  const otherPlayerIds =
+    gameState &&
+    gameState.order &&
+    playerId &&
+    gameState.order.filter(pid => pid !== playerId);
+  const mainPlayer = gameState && playerId && gameState.players[playerId];
+  const mainPlayerHand = mainPlayer && mainPlayer.hand;
+  const mainPlayerCash = mainPlayer && mainPlayer.cash;
+  const mainPlayerHandCash =
+    mainPlayerHand && mainPlayerHand.filter(card => card.type === 'cash');
+  const mainPlayerHandProperties =
+    mainPlayerHand && mainPlayerHand.filter(card => card.type === 'property');
+  const mainPlayerSets = mainPlayer && mainPlayer.sets;
+  const currentPlayer = gameState && gameState.order[gameState.turn];
 
   const getGameStatus = useCallback(() => gameStatus, [gameStatus]);
   const getPlayers = useCallback(() => players, [players]);
