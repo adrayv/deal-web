@@ -8,6 +8,7 @@ import GameLobbyRouter from 'components/GameLobbyRouter';
 import RootContextProvider from 'RootContextProvider';
 import RootEffects from 'RootEffects';
 import JoinGameFromLink from 'pages/JoinGameFromLink';
+import GlobalModal from 'components/GlobalModal';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <JoinGameFromLink path="/join-game/:gameId" />
       </Router>
       <RootEffects />
+      <GlobalModal />
     </RootContextProvider>
   );
 }
