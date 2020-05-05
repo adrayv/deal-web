@@ -54,6 +54,7 @@ export const GameStateProvider = ({ children }) => {
   const gameStatus = gameState && gameState.status;
   const players =
     gameState && gameState.order.map(pid => gameState.players[pid]);
+  const playersObj = gameState && gameState.players;
   const otherPlayerIds =
     gameState &&
     gameState.order &&
@@ -79,6 +80,22 @@ export const GameStateProvider = ({ children }) => {
     [gameStatus]
   );
   const getOtherPlayerIds = useCallback(() => otherPlayerIds, [otherPlayerIds]);
+  const getOtherPlayerCash = useCallback(
+    pid => playersObj && playersObj[pid] && playersObj[pid].cash,
+    [playersObj]
+  );
+  const getOtherPlayerName = useCallback(
+    pid => playersObj && playersObj[pid] && playersObj[pid].name,
+    [playersObj]
+  );
+  const getOtherPlayerSets = useCallback(
+    pid => playersObj && playersObj[pid] && playersObj[pid].sets,
+    [playersObj]
+  );
+  const getOtherPlayerHand = useCallback(
+    pid => playersObj && playersObj[pid] && playersObj[pid].hand,
+    [playersObj]
+  );
   const getPlayerById = useCallback(
     id => players.find(player => player.id === id),
     [players]
@@ -111,6 +128,10 @@ export const GameStateProvider = ({ children }) => {
         canStartGame,
         gameHasStarted,
         getOtherPlayerIds,
+        getOtherPlayerCash,
+        getOtherPlayerName,
+        getOtherPlayerHand,
+        getOtherPlayerSets,
         getMainPlayer,
         getMainPlayerHand,
         getMainPlayerCash,
