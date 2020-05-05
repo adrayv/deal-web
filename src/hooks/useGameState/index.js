@@ -30,6 +30,8 @@ export const GameStateProvider = ({ children }) => {
   const mainPlayer = gameState && playerId && gameState.players[playerId];
   const mainPlayerHand = mainPlayer && mainPlayer.hand;
   const mainPlayerCash = mainPlayer && mainPlayer.cash;
+  const mainPlayerHandCash =
+    mainPlayerCash && mainPlayer.hand.filter(card => card.type === 'cash');
   const currentPlayer = gameState && gameState.order[gameState.turn];
 
   useEffect(() => {
@@ -79,6 +81,9 @@ export const GameStateProvider = ({ children }) => {
   );
   const getMainPlayer = useCallback(() => mainPlayer, [mainPlayer]);
   const getMainPlayerHand = useCallback(() => mainPlayerHand, [mainPlayerHand]);
+  const getMainPlayerCashInHand = useCallback(() => mainPlayerHandCash, [
+    mainPlayerHandCash,
+  ]);
   const getMainPlayerCash = useCallback(() => mainPlayerCash, [mainPlayerCash]);
   const isMainPlayersTurn = useCallback(() => currentPlayer === playerId, [
     currentPlayer,
@@ -100,6 +105,7 @@ export const GameStateProvider = ({ children }) => {
         getMainPlayer,
         getMainPlayerHand,
         getMainPlayerCash,
+        getMainPlayerCashInHand,
         isMainPlayersTurn,
       }}
     >

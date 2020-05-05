@@ -5,6 +5,7 @@ import useGameState from 'hooks/useGameState';
 import useModal from 'hooks/useModal';
 import ViewMainPlayerHand from 'components/ViewMainPlayerHand';
 import ViewMainPlayerCash from 'components/ViewMainPlayerCash';
+import PlayCashCard from 'components/PlayCashCard';
 
 const Temp = styled.div`
   width: 300px;
@@ -29,12 +30,16 @@ export default () => {
     setComponent(<ViewMainPlayerCash />);
   }, [setComponent]);
 
+  const playCashHandler = useCallback(() => {
+    setComponent(<PlayCashCard />);
+  }, [setComponent]);
+
   if (mainPlayer) {
     const { name } = mainPlayer;
     return (
       <View
         onEndTurn={endTurnHandler}
-        onPlayCash={() => alert(`${name} wants to play cash`)}
+        onPlayCash={playCashHandler}
         onPlayProperty={() => alert(`${name} wants to play property`)}
         onViewCash={viewCashHander}
         onViewHand={viewHandHandler}
