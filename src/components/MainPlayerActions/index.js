@@ -7,6 +7,7 @@ import ViewMainPlayerCash from 'components/ViewMainPlayerCash';
 import PlayCashCard from 'components/PlayCashCard';
 import usePushAction from 'hooks/usePushAction';
 import { actionCreators } from 'game/core';
+import PlayPropertyCard from 'components/PlayPropertyCard';
 
 export default () => {
   const { setComponent } = useModal();
@@ -30,13 +31,17 @@ export default () => {
     setComponent(<PlayCashCard />);
   }, [setComponent]);
 
+  const playPropertyHandler = useCallback(() => {
+    setComponent(<PlayPropertyCard />);
+  }, [setComponent]);
+
   if (mainPlayer) {
     const { name } = mainPlayer;
     return (
       <View
         onEndTurn={endTurnHandler}
         onPlayCash={playCashHandler}
-        onPlayProperty={() => alert(`${name} wants to play property`)}
+        onPlayProperty={playPropertyHandler}
         onViewCash={viewCashHander}
         onViewHand={viewHandHandler}
         onViewProperties={() => alert(`${name} wants to view their properties`)}
