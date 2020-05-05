@@ -4,6 +4,7 @@ import View from './view';
 import useGameState from 'hooks/useGameState';
 import useModal from 'hooks/useModal';
 import ViewMainPlayerHand from 'components/ViewMainPlayerHand';
+import ViewMainPlayerCash from 'components/ViewMainPlayerCash';
 
 const Temp = styled.div`
   width: 300px;
@@ -24,6 +25,10 @@ export default () => {
     setComponent(<ViewMainPlayerHand />);
   }, [setComponent]);
 
+  const viewCashHander = useCallback(() => {
+    setComponent(<ViewMainPlayerCash />);
+  }, [setComponent]);
+
   if (mainPlayer) {
     const { name } = mainPlayer;
     return (
@@ -31,7 +36,7 @@ export default () => {
         onEndTurn={endTurnHandler}
         onPlayCash={() => alert(`${name} wants to play cash`)}
         onPlayProperty={() => alert(`${name} wants to play property`)}
-        onViewCash={() => alert(`${name} wants to view their cash`)}
+        onViewCash={viewCashHander}
         onViewHand={viewHandHandler}
         onViewProperties={() => alert(`${name} wants to view their properties`)}
       />

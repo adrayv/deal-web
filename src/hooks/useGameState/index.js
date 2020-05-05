@@ -29,6 +29,7 @@ export const GameStateProvider = ({ children }) => {
     gameState.order.filter(pid => pid !== playerId);
   const mainPlayer = gameState && playerId && gameState.players[playerId];
   const mainPlayerHand = mainPlayer && mainPlayer.hand;
+  const mainPlayerCash = mainPlayer && mainPlayer.cash;
   const currentPlayer = gameState && gameState.order[gameState.turn];
 
   useEffect(() => {
@@ -78,6 +79,7 @@ export const GameStateProvider = ({ children }) => {
   );
   const getMainPlayer = useCallback(() => mainPlayer, [mainPlayer]);
   const getMainPlayerHand = useCallback(() => mainPlayerHand, [mainPlayerHand]);
+  const getMainPlayerCash = useCallback(() => mainPlayerCash, [mainPlayerCash]);
   const isMainPlayersTurn = useCallback(() => currentPlayer === playerId, [
     currentPlayer,
     playerId,
@@ -97,6 +99,7 @@ export const GameStateProvider = ({ children }) => {
         getOtherPlayerIds,
         getMainPlayer,
         getMainPlayerHand,
+        getMainPlayerCash,
         isMainPlayersTurn,
       }}
     >
