@@ -32,7 +32,7 @@ export default ({ gameId }) => {
           storeSaveToken(gameId, player.id);
           setTimeout(() => {
             navigate(`/games/${gameId}`);
-          }, 1000);
+          }, 3000);
         } else {
           throw new Error('Cannot join game');
         }
