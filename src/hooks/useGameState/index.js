@@ -61,6 +61,8 @@ export const GameStateProvider = ({ children }) => {
     playerId &&
     gameState.order.filter(pid => pid !== playerId);
   const mainPlayer = gameState && playerId && gameState.players[playerId];
+  const mainPlayerId = mainPlayer && mainPlayer.id;
+  const mainPlayerName = mainPlayer && mainPlayer.name;
   const mainPlayerHand = mainPlayer && mainPlayer.hand;
   const mainPlayerCash = mainPlayer && mainPlayer.cash;
   const mainPlayerHandCash =
@@ -101,6 +103,8 @@ export const GameStateProvider = ({ children }) => {
     [players]
   );
   const getMainPlayer = useCallback(() => mainPlayer, [mainPlayer]);
+  const getMainPlayerId = useCallback(() => mainPlayerId, [mainPlayerId]);
+  const getMainPlayerName = useCallback(() => mainPlayerName, [mainPlayerName]);
   const getMainPlayerHand = useCallback(() => mainPlayerHand, [mainPlayerHand]);
   const getMainPlayerCashInHand = useCallback(() => mainPlayerHandCash, [
     mainPlayerHandCash,
@@ -133,6 +137,8 @@ export const GameStateProvider = ({ children }) => {
         getOtherPlayerHand,
         getOtherPlayerSets,
         getMainPlayer,
+        getMainPlayerId,
+        getMainPlayerName,
         getMainPlayerHand,
         getMainPlayerCash,
         getMainPlayerCashInHand,

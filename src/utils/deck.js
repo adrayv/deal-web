@@ -196,3 +196,9 @@ export const generateDeck = () => {
   };
   return _.flatMapDeep(Object.entries(types), makeTypes).filter(e => e);
 };
+
+const deck = generateDeck();
+
+export const getCardById = cardId => {
+  return deck.find(card => card.id === cardId);
+};

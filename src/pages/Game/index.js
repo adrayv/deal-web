@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import OtherPlayerList from 'components/OtherPlayerList';
 import MainPlayer from 'components/MainPlayer';
+import GameMessages from 'components/GameMessages';
 
 const GameLayout = styled.div`
   width: 100vw;
@@ -17,6 +18,7 @@ export default () => {
     <GameLayout>
       <OtherPlayerList />
       <MainPlayer />
+      <GameMessages />
     </GameLayout>
   );
 };

@@ -12,7 +12,7 @@ export const gameStatuses = {
   done: 'done',
 };
 
-const actionTypes = {
+export const actionTypes = {
   joinGame: '@join-game',
   startGame: '@start-game',
   playCard: '@play-card',
