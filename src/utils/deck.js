@@ -18,66 +18,66 @@ const types = {
     value: 4,
   },
   actions: {
-    rent: {
-      'sky-brown': {
-        value: 1,
-        count: 2,
-      },
-      'railroad-utility': {
-        value: 1,
-        count: 2,
-      },
-      'blue-green': {
-        value: 1,
-        count: 2,
-      },
-      'yellow-red': {
-        value: 1,
-        count: 2,
-      },
-      'purple-orange': {
-        value: 1,
-        count: 2,
-      },
-      any: {
-        value: 3,
-        count: 3,
-      },
-    },
-    dealbreaker: {
-      value: 5,
-      count: 2,
-    },
-    'say-no': {
-      value: 4,
-      count: 3,
-    },
+    // rent: {
+    //   'sky-brown': {
+    //     value: 1,
+    //     count: 2,
+    //   },
+    //   'railroad-utility': {
+    //     value: 1,
+    //     count: 2,
+    //   },
+    //   'blue-green': {
+    //     value: 1,
+    //     count: 2,
+    //   },
+    //   'yellow-red': {
+    //     value: 1,
+    //     count: 2,
+    //   },
+    //   'purple-orange': {
+    //     value: 1,
+    //     count: 2,
+    //   },
+    //   any: {
+    //     value: 3,
+    //     count: 3,
+    //   },
+    // },
+    // dealbreaker: {
+    //   value: 5,
+    //   count: 2,
+    // },
+    // 'say-no': {
+    //   value: 4,
+    //   count: 3,
+    // },
     'pass-go': {
       value: 1,
       count: 10,
     },
-    misc: {
-      'debt-collector': {
-        value: 3,
-        count: 3,
-      },
-      'forced-deal': {
-        value: 3,
-        count: 3,
-      },
-      'double-rent': {
-        value: 1,
-        count: 2,
-      },
-      'sly-deal': {
-        value: 3,
-        count: 3,
-      },
-      birthday: {
-        value: 2,
-        count: 3,
-      },
-    },
+    // misc: {
+    //   'debt-collector': {
+    //     value: 3,
+    //     count: 3,
+    //   },
+    //   'forced-deal': {
+    //     value: 3,
+    //     count: 3,
+    //   },
+    //   'double-rent': {
+    //     value: 1,
+    //     count: 2,
+    //   },
+    //   'sly-deal': {
+    //     value: 3,
+    //     count: 3,
+    //   },
+    //   birthday: {
+    //     value: 2,
+    //     count: 3,
+    //   },
+    // },
   },
   properties: {
     special: {
@@ -191,6 +191,17 @@ export const generateDeck = () => {
           color,
           value: propData.value,
         }));
+      });
+    } else if (type === 'actions') {
+      return Object.entries(data).map(([actionName, actionData]) => {
+        return [...new Array(actionData.count)].map((_, i) => {
+          return {
+            id: `action-${actionName}-${i}`,
+            type: 'action',
+            value: actionData.value,
+            name: actionName,
+          };
+        });
       });
     } else return null;
   };

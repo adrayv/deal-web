@@ -206,10 +206,22 @@ export function reducer(state, action) {
     }
     case actionTypes.playCard: {
       const { playerId, card } = action.data;
-      const newState = Object.assign({}, state);
+      let newState = Object.assign({}, state);
       const { order, turn, players } = newState;
 
       if (playerId === order[turn] && state.tasks.length === 0) {
+        newState.players[playerId].hand = players[playerId].hand.filter(
+          ({ id: cid }) => cid !== card.id
+        );
+        newState.cardsPlayed++;
+        if (newState.cardsPlayed >= 3) {
+          newState = reducer(newState, {
+            type: actionTypes.endTurn,
+            data: {
+              playerId,
+            },
+          });
+        }
         switch (card.type) {
           case 'cash': {
             newState.players[playerId].cash.push(card);
@@ -239,21 +251,22 @@ export function reducer(state, action) {
             }
             break;
           }
+          case 'action': {
+            newState.discard.push(card);
+            switch (card.name) {
+              case 'pass-go': {
+                newState.tasks.push(taskCreators.drawCards(playerId, 2));
+                break;
+              }
+              default: {
+                // continue
+              }
+            }
+            break;
+          }
           default: {
             // continue
           }
-        }
-        newState.players[playerId].hand = players[playerId].hand.filter(
-          ({ id: cid }) => cid !== card.id
-        );
-        newState.cardsPlayed++;
-        if (newState.cardsPlayed >= 3) {
-          return reducer(newState, {
-            type: actionTypes.endTurn,
-            data: {
-              playerId,
-            },
-          });
         }
       }
       return newState;
@@ -294,6 +307,30 @@ export function reducer(state, action) {
           newState.players[playerId].hand.push(newState.deck.pop());
         }
         newState.tasks.pop();
+
+        // if you drew cards as your last move and have to discard
+        if (
+          newState.players[playerId].hand.length > 7 &&
+          newState.order[newState.turn] !== playerId
+        ) {
+          let i = newState.tasks.length - 1;
+          // remove any upcoming tasks where this player must discard cards
+          while (
+            newState.tasks.length > 0 &&
+            i >= 0 &&
+            newState.tasks[i].to === playerId &&
+            newState.tasks[i].type === taskTypes.discardCards
+          ) {
+            newState.tasks.pop();
+            i--;
+          }
+          newState.tasks.push(
+            taskCreators.discardCards(
+              playerId,
+              newState.players[playerId].hand.length - 7
+            )
+          );
+        }
       }
       return newState;
     }
