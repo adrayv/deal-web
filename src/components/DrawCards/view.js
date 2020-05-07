@@ -3,10 +3,7 @@ import { Card, Button } from 'antd';
 
 export default ({ onClick, numCardsToDraw }) => (
   <div>
-    <Card
-      size="small"
-      title={`Draw ${numCardsToDraw} cards to begin your turn`}
-    >
+    <Card size="small" title={`Draw ${numCardsToDraw} cards`}>
       <Button block type="primary" onClick={onClick}>
         Draw {numCardsToDraw} cards
       </Button>

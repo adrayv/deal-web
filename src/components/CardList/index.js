@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import CashCard from 'components/CashCard';
 import PropertyCard from 'components/PropertyCard';
 import SetCard from 'components/SetCard';
+import ActionCard from 'components/ActionCard';
 
 const Layout = styled.div`
   & > * {
@@ -29,6 +30,8 @@ export default ({ title, cards }) => (
               color={card.color}
             />
           );
+        } else if (card.type === 'action') {
+          return <ActionCard name={card.name} value={card.value} />;
         } else {
           return (
             <SetCard

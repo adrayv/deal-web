@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import View from './view';
 import useGameState from 'hooks/useGameState';
 import usePushAction from 'hooks/usePushAction';
-import { actionCreators } from 'game/core';
+import { actionCreators, taskTypes } from 'game/core';
 
 export default () => {
   const { getMainPlayerOpenTask, playerId } = useGameState();
@@ -13,7 +13,7 @@ export default () => {
     pushAction(actionCreators.resolveDrawCards(playerId));
   }, [pushAction, playerId]);
 
-  if (task) {
+  if (task && task.type === taskTypes.drawCards) {
     const numCardsToDraw = task.payload.numCardsToDraw;
     return <View onClick={clickHandler} numCardsToDraw={numCardsToDraw} />;
   }
