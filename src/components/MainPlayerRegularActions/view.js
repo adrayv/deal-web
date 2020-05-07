@@ -20,16 +20,25 @@ const Screen = styled.div`
   display: ${props => (props.isActive ? 'initial' : 'none')};
 `;
 
-export default ({ onEndTurn, onPlayProperty, onPlayCash, canInteract }) => (
+export default ({
+  onEndTurn,
+  onPlayProperty,
+  onPlayCash,
+  onPlayAction,
+  canInteract,
+}) => (
   <CardWrapper>
     <Screen isActive={!canInteract} />
     <Card title="Regular Actions" size="small">
       <Layout>
         <Button type="primary" onClick={onPlayProperty}>
-          Play a Property
+          Play Property
         </Button>
         <Button type="primary" onClick={onPlayCash}>
           Play Cash
+        </Button>
+        <Button type="primary" onClick={onPlayAction}>
+          Play Action
         </Button>
         <Button type="danger" onClick={onEndTurn}>
           End Turn

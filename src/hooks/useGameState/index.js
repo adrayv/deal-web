@@ -69,6 +69,8 @@ export const GameStateProvider = ({ children }) => {
     mainPlayerHand && mainPlayerHand.filter(card => card.type === 'cash');
   const mainPlayerHandProperties =
     mainPlayerHand && mainPlayerHand.filter(card => card.type === 'property');
+  const mainPlayerHandActions =
+    mainPlayerHand && mainPlayerHand.filter(card => card.type === 'action');
   const mainPlayerSets = mainPlayer && mainPlayer.sets;
   const currentPlayer = gameState && gameState.order[gameState.turn];
   const numTasks = gameState && gameState.tasks && gameState.tasks.length;
@@ -116,6 +118,9 @@ export const GameStateProvider = ({ children }) => {
     () => mainPlayerHandProperties,
     [mainPlayerHandProperties]
   );
+  const getMainPlayerActionsInHand = useCallback(() => mainPlayerHandActions, [
+    mainPlayerHandActions,
+  ]);
   const getMainPlayerSets = useCallback(() => mainPlayerSets, [mainPlayerSets]);
   const getMainPlayerCash = useCallback(() => mainPlayerCash, [mainPlayerCash]);
   const isMainPlayersTurn = useCallback(() => currentPlayer === playerId, [
@@ -155,6 +160,7 @@ export const GameStateProvider = ({ children }) => {
         getMainPlayerCash,
         getMainPlayerCashInHand,
         getMainPlayerPropertiesInHand,
+        getMainPlayerActionsInHand,
         getMainPlayerSets,
         isMainPlayersTurn,
         gameHasOpenTasks,

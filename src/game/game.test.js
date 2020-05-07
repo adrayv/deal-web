@@ -6,6 +6,7 @@ import { shuffle } from 'utils/array';
 /*
   TODO: 
   - trying to play card while task is active
+  - playing action card as cash
 */
 
 test('joining a game', () => {

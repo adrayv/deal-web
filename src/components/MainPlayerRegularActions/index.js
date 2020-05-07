@@ -6,6 +6,7 @@ import PlayCashCard from 'components/PlayCashCard';
 import usePushAction from 'hooks/usePushAction';
 import { actionCreators } from 'game/core';
 import PlayPropertyCard from 'components/PlayPropertyCard';
+import PlayActionCard from 'components/PlayActionCard';
 
 export default () => {
   const { setComponent } = useModal();
@@ -30,12 +31,17 @@ export default () => {
     setComponent(<PlayPropertyCard />);
   }, [setComponent]);
 
+  const playActionHandler = useCallback(() => {
+    setComponent(<PlayActionCard />);
+  }, [setComponent]);
+
   if (mainPlayer) {
     return (
       <View
         onEndTurn={endTurnHandler}
         onPlayCash={playCashHandler}
         onPlayProperty={playPropertyHandler}
+        onPlayAction={playActionHandler}
         canInteract={isMainPlayersTurn() && !gameHasOpenTasks()}
       />
     );
