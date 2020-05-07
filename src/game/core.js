@@ -18,7 +18,14 @@ export const actionTypes = {
   playCard: '@play-card',
   drawCard: '@draw-card',
   discardCard: '@discard-card',
+  resolveTask: {
+    drawCards: '@resolve-draw-cards',
+  },
   endTurn: '@end-turn',
+};
+
+export const taskTypes = {
+  drawCards: '@draw-cards',
 };
 
 export const actionCreators = {
@@ -53,6 +60,14 @@ export const actionCreators = {
       },
     };
   },
+  resolveDrawCards(playerId) {
+    return {
+      type: actionTypes.resolveTask.drawCards,
+      data: {
+        playerId,
+      },
+    };
+  },
   endTurn(playerId) {
     return {
       type: actionTypes.endTurn,
@@ -71,12 +86,26 @@ export const actionCreators = {
   },
 };
 
+const taskCreators = {
+  drawCards(playerId, numCardsToDraw) {
+    return {
+      type: taskTypes.drawCards,
+      from: playerId,
+      to: playerId,
+      payload: {
+        numCardsToDraw,
+      },
+    };
+  },
+};
+
 export function createInitialGameState(initialPlayer) {
   return {
     turn: 0,
     cardsPlayed: 0,
     deck: shuffle(generateDeck()),
     discard: [],
+    tasks: [],
     players: {
       [initialPlayer.id]: initialPlayer,
     },
@@ -163,6 +192,7 @@ export function reducer(state, action) {
             });
           }
         }
+        newState.tasks.push(taskCreators.drawCards(newState.order[0], 2));
       }
       return newState;
     }
@@ -171,7 +201,7 @@ export function reducer(state, action) {
       const newState = Object.assign({}, state);
       const { order, turn, players } = newState;
 
-      if (playerId === order[turn]) {
+      if (playerId === order[turn] && state.tasks.length === 0) {
         switch (card.type) {
           case 'cash': {
             newState.players[playerId].cash.push(card);
@@ -236,17 +266,30 @@ export function reducer(state, action) {
       newState.discard.push(card);
       return newState;
     }
+    case actionTypes.resolveTask.drawCards: {
+      const { playerId } = action.data;
+      const newState = Object.assign({}, state);
+      const taskToResolve = newState.tasks[newState.tasks.length - 1];
+      if (taskToResolve.to === playerId) {
+        const { numCardsToDraw } = taskToResolve.payload;
+        for (let i = 0; i < numCardsToDraw; i++) {
+          newState.players[playerId].hand.push(newState.deck.pop());
+        }
+        newState.tasks.pop();
+      }
+      return newState;
+    }
     case actionTypes.endTurn: {
       const newState = Object.assign({}, state);
       newState.turn =
         newState.turn < newState.order.length - 1 ? newState.turn + 1 : 0;
-      newState.players[newState.order[newState.turn]].hand.push(
-        newState.deck.pop()
-      );
-      newState.players[newState.order[newState.turn]].hand.push(
-        newState.deck.pop()
-      );
       newState.cardsPlayed = 0;
+      const nextPlayer = newState.players[newState.order[newState.turn]];
+      if (nextPlayer.hand.length === 0) {
+        newState.tasks.push(taskCreators.drawCards(nextPlayer.id, 5));
+      } else {
+        newState.tasks.push(taskCreators.drawCards(nextPlayer.id, 2));
+      }
       return newState;
     }
     default:

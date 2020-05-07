@@ -71,6 +71,9 @@ export const GameStateProvider = ({ children }) => {
     mainPlayerHand && mainPlayerHand.filter(card => card.type === 'property');
   const mainPlayerSets = mainPlayer && mainPlayer.sets;
   const currentPlayer = gameState && gameState.order[gameState.turn];
+  const numTasks = gameState && gameState.tasks && gameState.tasks.length;
+  const nextTask =
+    gameState && gameState.tasks && gameState.tasks[gameState.tasks.length - 1];
 
   const getGameStatus = useCallback(() => gameStatus, [gameStatus]);
   const getPlayers = useCallback(() => players, [players]);
@@ -119,6 +122,15 @@ export const GameStateProvider = ({ children }) => {
     currentPlayer,
     playerId,
   ]);
+  const gameHasOpenTasks = useCallback(() => numTasks > 0, [numTasks]);
+  const mainPlayerHasAnOpenTask = useCallback(
+    () => nextTask && nextTask.to === playerId,
+    [playerId, nextTask]
+  );
+  const getMainPlayerOpenTask = useCallback(
+    () => nextTask && nextTask.to === playerId && nextTask,
+    [playerId, nextTask]
+  );
 
   return (
     <Provider
@@ -145,6 +157,9 @@ export const GameStateProvider = ({ children }) => {
         getMainPlayerPropertiesInHand,
         getMainPlayerSets,
         isMainPlayersTurn,
+        gameHasOpenTasks,
+        mainPlayerHasAnOpenTask,
+        getMainPlayerOpenTask,
       }}
     >
       {children}

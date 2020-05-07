@@ -32,6 +32,5 @@ export const getLastMessage = async gameId => {
     .orderBy('created_at', 'desc')
     .limit(1)
     .get();
-  console.log('MESSAGE', message);
   return message && message.data && message.data();
 };

@@ -1,23 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
-import MainPlayerActions from 'components/MainPlayerActions';
+import MainPlayerRegularActions from 'components/MainPlayerRegularActions';
+import MainPlayerStatuses from 'components/MainPlayerStatuses';
+import MainPlayerSpecialActions from 'components/MainPlayerSpecialActions';
 
 const Layout = styled.div`
-  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
 `;
 
-const Screen = styled.div`
-  position: absolute;
-  background: rgba(255, 255, 255, 0.7);
-  width: 100%;
-  height: 100%;
-  z-index: 10;
-  display: ${props => (props.isActive ? 'initial' : 'none')};
-`;
-
-export default ({ canInteract }) => (
-  <Layout>
-    <Screen isActive={!canInteract} />
-    <MainPlayerActions />
-  </Layout>
-);
+export default () => {
+  return (
+    <Layout>
+      <MainPlayerRegularActions />
+      <MainPlayerSpecialActions />
+      <MainPlayerStatuses />
+    </Layout>
+  );
+};
