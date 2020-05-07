@@ -6,6 +6,7 @@ import { shuffle } from 'utils/array';
 /*
   TODO: 
   - trying to play card while task is active
+  - last card to play is an action card
 */
 
 test('joining a game', () => {
@@ -296,53 +297,6 @@ test('drawing a card', () => {
   ).toBe(true);
 });
 
-test('discarding a card', () => {
-  const state = {
-    turn: 0,
-    status: 'in-progress',
-    cardsPlayed: 0,
-    deck: [],
-    tasks: [],
-    discard: [{ id: 'cash-val-1-0', type: 'cash', value: 1 }],
-    players: {
-      p1: {
-        id: 'p1',
-        name: 'player 1',
-        properties: [],
-        sets: [],
-        cash: [],
-        hand: [],
-      },
-      p2: {
-        id: 'p2',
-        name: 'player 2',
-        properties: [],
-        cash: [],
-        sets: [],
-        hand: [{ id: 'cash-val-1-4', type: 'cash', value: 1 }],
-      },
-    },
-    order: ['p2', 'p1'],
-    winner: null,
-  };
-
-  const discardCount = state.discard.length;
-  const cardToDiscard = state.players['p2'].hand[0];
-
-  const newState = reducer(
-    state,
-    actionCreators.discardCard('p2', cardToDiscard)
-  );
-
-  expect(
-    newState.players['p2'].hand.find(card => card.id === cardToDiscard.id)
-  ).toBe(undefined);
-  expect(newState.discard.length).toBe(discardCount + 1);
-  expect(newState.discard[newState.discard.length - 1].id).toBe(
-    cardToDiscard.id
-  );
-});
-
 test('ending a turn', () => {
   const state = {
     turn: 0,
@@ -560,6 +514,112 @@ test('resolving a draw 2 cards task', () => {
   expect(newState.deck.length).toBe(0);
 });
 
+test('ending a turn with more than 7 cards in hand', () => {
+  const state = {
+    turn: 0,
+    status: 'in-progress',
+    cardsPlayed: 0,
+    tasks: [],
+    deck: [],
+    discard: [],
+    players: {
+      p1: {
+        id: 'p1',
+        name: 'player 1',
+        properties: [],
+        sets: [],
+        cash: [],
+        hand: [],
+      },
+      p2: {
+        id: 'p2',
+        name: 'player 2',
+        properties: [],
+        cash: [],
+        sets: [],
+        hand: [
+          { id: 'cash-val-1-0', type: 'cash', value: 1 },
+          { id: 'cash-val-1-1', type: 'cash', value: 1 },
+          { id: 'cash-val-1-2', type: 'cash', value: 1 },
+          { id: 'cash-val-1-3', type: 'cash', value: 1 },
+          { id: 'cash-val-1-4', type: 'cash', value: 1 },
+          { id: 'cash-val-1-5', type: 'cash', value: 1 },
+          { id: 'cash-val-1-6', type: 'cash', value: 1 },
+          { id: 'cash-val-1-7', type: 'cash', value: 1 },
+        ],
+      },
+    },
+    order: ['p2', 'p1'],
+    winner: null,
+  };
+  const newState = reducer(state, actionCreators.endTurn('p2'));
+  expect(newState.tasks.length).toBe(2);
+  expect(newState.tasks[0].type).toBe(taskTypes.drawCards);
+  expect(newState.tasks[0].to).toBe('p1');
+  expect(newState.tasks[1].type).toBe(taskTypes.discardCards);
+  expect(newState.tasks[1].to).toBe('p2');
+  expect(newState.tasks[1].payload.numCardsToDiscard).toBe(1);
+});
+
+test('resolving a discard cards task', () => {
+  const state = {
+    turn: 0,
+    status: 'in-progress',
+    cardsPlayed: 0,
+    tasks: [],
+    deck: [],
+    discard: [],
+    players: {
+      p1: {
+        id: 'p1',
+        name: 'player 1',
+        properties: [],
+        sets: [],
+        cash: [],
+        hand: [],
+      },
+      p2: {
+        id: 'p2',
+        name: 'player 2',
+        properties: [],
+        cash: [],
+        sets: [],
+        hand: [
+          { id: 'cash-val-1-0', type: 'cash', value: 1 },
+          { id: 'cash-val-1-1', type: 'cash', value: 1 },
+          { id: 'cash-val-1-2', type: 'cash', value: 1 },
+          { id: 'cash-val-1-3', type: 'cash', value: 1 },
+          { id: 'cash-val-1-4', type: 'cash', value: 1 },
+          { id: 'cash-val-1-5', type: 'cash', value: 1 },
+          { id: 'cash-val-1-6', type: 'cash', value: 1 },
+          { id: 'cash-val-1-7', type: 'cash', value: 1 },
+        ],
+      },
+    },
+    order: ['p2', 'p1'],
+    winner: null,
+  };
+  let newState = reducer(state, actionCreators.endTurn('p2'));
+  expect(newState.tasks.length).toBe(2);
+  expect(newState.tasks[1].type).toBe(taskTypes.discardCards);
+  expect(newState.tasks[1].to).toBe('p2');
+  expect(newState.tasks[1].payload.numCardsToDiscard).toBe(1);
+  newState = reducer(
+    newState,
+    actionCreators.resolveDiscardCards('p2', [
+      { id: 'cash-val-1-4', type: 'cash', value: 1 },
+    ])
+  );
+  expect(newState.tasks.length).toBe(1);
+  expect(newState.discard.length).toBe(1);
+  expect(
+    Boolean(
+      newState.players['p2'].hand.find(card => card.id === 'cash-val-1-4')
+    )
+  ).toBe(false);
+  expect(newState.discard[0].id).toBe('cash-val-1-4');
+});
+
 test('completing a set', () => {
   const state = {
     turn: 0,
@@ -651,7 +711,7 @@ test('winning a game', () => {
         properties: [],
         sets: [],
         cash: [],
-        hand: [],
+        hand: [{ id: 'cash-val-1-10', type: 'cash', value: 1 }],
       },
       p2: {
         id: 'p2',
@@ -689,25 +749,18 @@ test('winning a game', () => {
             value: 1,
           },
           {
-            id: 'property-green-pennsylvania',
+            id: 'property-mint-water-works',
             type: 'property',
-            name: 'pennsylvania',
-            color: 'green',
-            value: 4,
+            name: 'water-works',
+            color: 'mint',
+            value: 2,
           },
           {
-            id: 'property-green-pacific',
+            id: 'property-mint-electric-company',
             type: 'property',
-            name: 'pacific',
-            color: 'green',
-            value: 4,
-          },
-          {
-            id: 'property-green-north-carolina',
-            type: 'property',
-            name: 'north-carolina',
-            color: 'green',
-            value: 4,
+            name: 'electric-company',
+            color: 'mint',
+            value: 2,
           },
         ],
       },
@@ -717,15 +770,18 @@ test('winning a game', () => {
   };
 
   let newState = state;
-  const greenCards = state.players['p2'].hand.filter(
-    card => card.type === 'property' && card.color === 'green'
+  const mintCards = state.players['p2'].hand.filter(
+    card => card.type === 'property' && card.color === 'mint'
   );
-  expect(greenCards.length).toBe(3);
-  for (let i = 0; i < greenCards.length; i++) {
-    newState = reducer(newState, actionCreators.playCard('p2', greenCards[i]));
+  expect(mintCards.length).toBe(2);
+  for (let i = 0; i < mintCards.length; i++) {
+    newState = reducer(newState, actionCreators.playCard('p2', mintCards[i]));
   }
+  newState = reducer(newState, actionCreators.endTurn('p2'));
+  newState = reducer(newState, actionCreators.resolveDrawCards('p1'));
   newState = reducer(newState, actionCreators.endTurn('p1'));
 
+  newState = reducer(newState, actionCreators.resolveDrawCards('p2'));
   const blueCards = newState.players['p2'].hand.filter(
     card => card.type === 'property' && card.color === 'blue'
   );
@@ -734,8 +790,10 @@ test('winning a game', () => {
     newState = reducer(newState, actionCreators.playCard('p2', blueCards[i]));
   }
   newState = reducer(newState, actionCreators.endTurn('p2'));
+  newState = reducer(newState, actionCreators.resolveDrawCards('p1'));
   newState = reducer(newState, actionCreators.endTurn('p1'));
 
+  newState = reducer(newState, actionCreators.resolveDrawCards('p2'));
   const brownCards = newState.players['p2'].hand.filter(
     card => card.type === 'property' && card.color === 'brown'
   );

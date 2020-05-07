@@ -17,15 +17,16 @@ export const actionTypes = {
   startGame: '@start-game',
   playCard: '@play-card',
   drawCard: '@draw-card',
-  discardCard: '@discard-card',
   resolveTask: {
     drawCards: '@resolve-draw-cards',
+    discardCards: '@resolve-discard-cards',
   },
   endTurn: '@end-turn',
 };
 
 export const taskTypes = {
-  drawCards: '@draw-cards',
+  drawCards: '@task-draw-cards',
+  discardCards: '@task-discard-cards',
 };
 
 export const actionCreators = {
@@ -51,20 +52,20 @@ export const actionCreators = {
       },
     };
   },
-  discardCard(playerId, card) {
-    return {
-      type: actionTypes.discardCard,
-      data: {
-        playerId,
-        card,
-      },
-    };
-  },
   resolveDrawCards(playerId) {
     return {
       type: actionTypes.resolveTask.drawCards,
       data: {
         playerId,
+      },
+    };
+  },
+  resolveDiscardCards(playerId, cardsToDiscard) {
+    return {
+      type: actionTypes.resolveTask.discardCards,
+      data: {
+        playerId,
+        cardsToDiscard,
       },
     };
   },
@@ -94,6 +95,16 @@ const taskCreators = {
       to: playerId,
       payload: {
         numCardsToDraw,
+      },
+    };
+  },
+  discardCards(playerId, numCardsToDiscard) {
+    return {
+      type: taskTypes.discardCards,
+      from: playerId,
+      to: playerId,
+      payload: {
+        numCardsToDiscard,
       },
     };
   },
@@ -186,10 +197,7 @@ export function reducer(state, action) {
         for (let i = 0; i < 5; i++) {
           for (let j = 0; j < newState.order.length; j++) {
             const playerId = newState.order[j];
-            newState = reducer(newState, {
-              type: actionTypes.drawCard,
-              data: { playerId },
-            });
+            newState = reducer(newState, actionCreators.drawCard(playerId));
           }
         }
         newState.tasks.push(taskCreators.drawCards(newState.order[0], 2));
@@ -257,13 +265,23 @@ export function reducer(state, action) {
       newState.players[playerId].hand.push(drawnCard);
       return newState;
     }
-    case actionTypes.discardCard: {
-      const { playerId, card } = action.data;
+    case actionTypes.resolveTask.discardCards: {
+      const { playerId, cardsToDiscard } = action.data;
       const newState = Object.assign({}, state);
-      newState.players[playerId].hand = newState.players[playerId].hand.filter(
-        ({ id: cid }) => cid !== card.id
-      );
-      newState.discard.push(card);
+      const taskToResolve = newState.tasks[newState.tasks.length - 1];
+      const player = newState.players[playerId];
+      if (
+        taskToResolve.to === playerId &&
+        player.hand.length - cardsToDiscard.length <= 7
+      ) {
+        cardsToDiscard.forEach(card => {
+          newState.players[playerId].hand = newState.players[
+            playerId
+          ].hand.filter(({ id: cid }) => cid !== card.id);
+          newState.discard.push(card);
+        });
+        newState.tasks.pop();
+      }
       return newState;
     }
     case actionTypes.resolveTask.drawCards: {
@@ -281,6 +299,7 @@ export function reducer(state, action) {
     }
     case actionTypes.endTurn: {
       const newState = Object.assign({}, state);
+      const currentPlayer = state.players[state.order[state.turn]];
       newState.turn =
         newState.turn < newState.order.length - 1 ? newState.turn + 1 : 0;
       newState.cardsPlayed = 0;
@@ -289,6 +308,14 @@ export function reducer(state, action) {
         newState.tasks.push(taskCreators.drawCards(nextPlayer.id, 5));
       } else {
         newState.tasks.push(taskCreators.drawCards(nextPlayer.id, 2));
+      }
+      if (currentPlayer.hand.length > 7) {
+        newState.tasks.push(
+          taskCreators.discardCards(
+            currentPlayer.id,
+            currentPlayer.hand.length - 7
+          )
+        );
       }
       return newState;
     }
