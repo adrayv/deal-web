@@ -20,13 +20,10 @@ export const actionTypes = {
   resolveTask: {
     drawCards: '@resolve-draw-cards',
     discardCards: '@resolve-discard-cards',
+    selectCardToSteal: '@resolve-select-card-to-steal',
+    surrenderCard: '@resolve-surrender-card',
   },
   endTurn: '@end-turn',
-};
-
-export const taskTypes = {
-  drawCards: '@task-draw-cards',
-  discardCards: '@task-discard-cards',
 };
 
 export const actionCreators = {
@@ -69,6 +66,22 @@ export const actionCreators = {
       },
     };
   },
+  resolveSelectCardToSteal(attackerId, victimId, cardToSteal) {
+    return {
+      type: actionTypes.resolveTask.selectCardToSteal,
+      data: {
+        attackerId,
+        victimId,
+        cardToSteal,
+      },
+    };
+  },
+  resolveSurrenderCard(playerId) {
+    return {
+      type: actionTypes.resolveTask.surrenderCard,
+      data: { playerId },
+    };
+  },
   endTurn(playerId) {
     return {
       type: actionTypes.endTurn,
@@ -85,6 +98,13 @@ export const actionCreators = {
       },
     };
   },
+};
+
+export const taskTypes = {
+  drawCards: '@task-draw-cards',
+  discardCards: '@task-discard-cards',
+  surrenderCard: '@task-surrender-card',
+  selectCardToSteal: '@task-select-card-to-steal',
 };
 
 const taskCreators = {
@@ -106,6 +126,24 @@ const taskCreators = {
       payload: {
         numCardsToDiscard,
       },
+    };
+  },
+  surrenderCard(attackerId, victimId, cardToSurrender) {
+    return {
+      type: taskTypes.surrenderCard,
+      from: attackerId,
+      to: victimId,
+      payload: {
+        cardToSurrender,
+      },
+    };
+  },
+  selectCardToSteal(playerId) {
+    return {
+      type: taskTypes.selectCardToSteal,
+      from: playerId,
+      to: playerId,
+      payload: {},
     };
   },
 };
@@ -258,6 +296,10 @@ export function reducer(state, action) {
                 newState.tasks.push(taskCreators.drawCards(playerId, 2));
                 break;
               }
+              case 'sly-deal': {
+                newState.tasks.push(taskCreators.selectCardToSteal(playerId));
+                break;
+              }
               default: {
                 // continue
               }
@@ -330,6 +372,77 @@ export function reducer(state, action) {
               newState.players[playerId].hand.length - 7
             )
           );
+        }
+      }
+      return newState;
+    }
+    case actionTypes.resolveTask.selectCardToSteal: {
+      const { attackerId, victimId, cardToSteal } = action.data;
+      const newState = Object.assign({}, state);
+      if (
+        attackerId !== victimId &&
+        state.players[victimId].sets.find(
+          set => !set.complete && set.cards.find(c => c.id === cardToSteal.id)
+        )
+      ) {
+        newState.tasks.pop();
+        newState.tasks.push(
+          taskCreators.surrenderCard(attackerId, victimId, cardToSteal)
+        );
+      }
+      return newState;
+    }
+    case actionTypes.resolveTask.surrenderCard: {
+      const { playerId } = action.data;
+      let newState = Object.assign({}, state);
+      if (playerId === state.tasks[state.tasks.length - 1].to) {
+        const taskToResolve = newState.tasks.pop();
+        const {
+          from: attackerId,
+          to: victimId,
+          payload: { cardToSurrender },
+        } = taskToResolve;
+        const setToChangeIndex = newState.players[victimId].sets.findIndex(
+          set =>
+            !set.complete && set.cards.find(c => c.id === cardToSurrender.id)
+        );
+        const setToChange = newState.players[victimId].sets[setToChangeIndex];
+        newState.players[victimId].sets[setToChangeIndex] = {
+          ...setToChange,
+          cards: setToChange.cards.filter(c => c.id !== cardToSurrender.id),
+        };
+        // if the card taken was the only card in set
+        if (
+          newState.players[victimId].sets[setToChangeIndex].cards.length === 0
+        ) {
+          newState.players[victimId].sets[setToChangeIndex] = null;
+          newState.players[victimId].sets = newState.players[
+            victimId
+          ].sets.filter(s => s);
+        }
+
+        const targetSetIndex = newState.players[attackerId].sets.findIndex(
+          set => set.color === cardToSurrender.color && !set.complete
+        );
+        if (targetSetIndex !== -1) {
+          newState.players[attackerId].sets[targetSetIndex].cards.push(
+            cardToSurrender
+          );
+          if (
+            setIsComplete(newState.players[attackerId].sets[targetSetIndex])
+          ) {
+            newState.players[attackerId].sets[targetSetIndex].complete = true;
+          }
+        } else {
+          newState.players[attackerId].sets.push({
+            color: cardToSurrender.color,
+            complete: false,
+            cards: [cardToSurrender],
+          });
+        }
+        if (playerWon(attackerId, newState)) {
+          newState.winner = attackerId;
+          newState.status = gameStatuses.done;
         }
       }
       return newState;

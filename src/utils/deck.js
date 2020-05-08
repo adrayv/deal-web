@@ -56,6 +56,10 @@ const types = {
       value: 1,
       count: 10,
     },
+    'sly-deal': {
+      value: 3,
+      count: 3,
+    },
     // misc: {
     //   'debt-collector': {
     //     value: 3,
@@ -68,10 +72,6 @@ const types = {
     //   'double-rent': {
     //     value: 1,
     //     count: 2,
-    //   },
-    //   'sly-deal': {
-    //     value: 3,
-    //     count: 3,
     //   },
     //   birthday: {
     //     value: 2,
