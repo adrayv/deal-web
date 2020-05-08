@@ -60,6 +60,8 @@ export const GameStateProvider = ({ children }) => {
     gameState.order &&
     playerId &&
     gameState.order.filter(pid => pid !== playerId);
+  const otherPlayers =
+    playersObj && otherPlayerIds && otherPlayerIds.map(id => playersObj[id]);
   const mainPlayer = gameState && playerId && gameState.players[playerId];
   const mainPlayerId = mainPlayer && mainPlayer.id;
   const mainPlayerName = mainPlayer && mainPlayer.name;
@@ -136,6 +138,25 @@ export const GameStateProvider = ({ children }) => {
     () => nextTask && nextTask.to === playerId && nextTask,
     [playerId, nextTask]
   );
+  const getCardsToSteal = useCallback(() => {
+    const cardsToSteal = [];
+    otherPlayers.forEach(player => {
+      player.sets.forEach(set => {
+        if (!set.complete) {
+          set.cards.forEach(card => {
+            cardsToSteal.push({
+              owner: {
+                id: player.id,
+                name: player.name,
+              },
+              ...card,
+            });
+          });
+        }
+      });
+    });
+    return cardsToSteal;
+  }, [otherPlayers]);
 
   return (
     <Provider
@@ -162,6 +183,7 @@ export const GameStateProvider = ({ children }) => {
         getMainPlayerPropertiesInHand,
         getMainPlayerActionsInHand,
         getMainPlayerSets,
+        getCardsToSteal,
         isMainPlayersTurn,
         gameHasOpenTasks,
         mainPlayerHasAnOpenTask,
