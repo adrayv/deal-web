@@ -44,10 +44,10 @@ const types = {
     //     count: 3,
     //   },
     // },
-    // dealbreaker: {
-    //   value: 5,
-    //   count: 2,
-    // },
+    dealbreaker: {
+      value: 5,
+      count: 2,
+    },
     // 'say-no': {
     //   value: 4,
     //   count: 3,

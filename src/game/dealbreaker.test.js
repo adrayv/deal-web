@@ -1,12 +1,11 @@
 import { reducer, actionCreators, taskTypes } from 'game/core';
 
 /*
-	- sly deal getting just-say-no'd
-	- trying to play a sly deal card when there's nothing to steal
-  - say no: playing a sly deal in response to a from-to action (can say no to [say-no, sly-deal, forced-deal, charge, dealbreaker])
+	- dealbreaker getting just-say-no'd
+	- trying to play a dealbreaker when there's nothing to steal
 */
 
-test('playing a sly deal card', () => {
+test('playing a dealbreaker card', () => {
   const state = {
     turn: 0,
     status: 'in-progress',
@@ -21,22 +20,22 @@ test('playing a sly deal card', () => {
         properties: [],
         sets: [
           {
-            complete: false,
-            color: 'purple',
+            complete: true,
+            color: 'blue',
             cards: [
               {
-                id: 'property-purple-st-charles',
+                id: 'property-blue-park-place',
                 type: 'property',
-                name: 'st-charles',
-                color: 'purple',
-                value: 2,
+                name: 'park-place',
+                color: 'blue',
+                value: 4,
               },
               {
-                id: 'property-purple-states-ave',
+                id: 'property-blue-boardwalk',
                 type: 'property',
-                name: 'states-ave',
-                color: 'purple',
-                value: 2,
+                name: 'boardwalk',
+                color: 'blue',
+                value: 4,
               },
             ],
           },
@@ -52,10 +51,10 @@ test('playing a sly deal card', () => {
         sets: [],
         hand: [
           {
-            id: 'action-sly-deal-0',
+            id: 'action-dealbreaker-0',
             type: 'action',
-            value: 3,
-            name: 'sly-deal',
+            value: 5,
+            name: 'dealbreaker',
           },
         ],
       },
@@ -72,47 +71,33 @@ test('playing a sly deal card', () => {
   expect(newState.tasks.length).toBe(1);
   expect(newState.tasks[0].to).toBe('p2');
   expect(newState.tasks[0].from).toBe('p2');
-  expect(newState.tasks[0].type).toBe(taskTypes.selectCardToSteal);
+  expect(newState.tasks[0].type).toBe(taskTypes.selectSetToSteal);
   expect(newState.discard.length).toBe(1);
-  expect(newState.discard[0].id).toBe('action-sly-deal-0');
-
-  const cardToSteal = newState.players['p1'].sets[0].cards[0];
+  expect(newState.discard[0].id).toBe('action-dealbreaker-0');
 
   newState = reducer(
     newState,
-    actionCreators.resolveSelectCardToSteal('p2', 'p1', cardToSteal)
+    actionCreators.resolveSelectSetToSteal('p2', 'p1', 0)
   );
 
   expect(newState.tasks.length).toBe(1);
   expect(newState.tasks[0].to).toBe('p1');
   expect(newState.tasks[0].from).toBe('p2');
-  expect(newState.tasks[0].type).toBe(taskTypes.surrenderCard);
-  expect(newState.tasks[0].payload.cardToSurrender.id).toBe(
-    'property-purple-st-charles'
-  );
+  expect(newState.tasks[0].type).toBe(taskTypes.surrenderSet);
+  expect(newState.tasks[0].payload.setToSurrenderIndex).toBe(0);
 
-  newState = reducer(newState, actionCreators.resolveSurrenderCard('p1'));
+  newState = reducer(newState, actionCreators.resolveSurrenderSet('p1'));
 
   expect(newState.tasks.length).toBe(0);
   expect(newState.cardsPlayed).toBe(1);
-  expect(newState.players['p1'].sets.length).toBe(1);
-  expect(newState.players['p1'].sets[0].cards.length).toBe(1);
-  expect(newState.players['p1'].sets[0].cards[0].id).toBe(
-    'property-purple-states-ave'
-  );
+  expect(newState.players['p1'].sets.length).toBe(0);
   expect(newState.players['p2'].sets.length).toBe(1);
-  expect(
-    Boolean(
-      newState.players['p2'].sets.find(
-        set =>
-          set.color === 'purple' &&
-          set.cards.find(c => c.id === 'property-purple-st-charles')
-      )
-    )
-  ).toBe(true);
+  expect(newState.players['p2'].sets[0].complete).toBe(true);
+  expect(newState.players['p2'].sets[0].color).toBe('blue');
+  expect(newState.players['p2'].sets[0].cards.length).toBe(2);
 });
 
-test('playing sly deal as your last card', () => {
+test('playing dealbreaker as your last card', () => {
   const state = {
     turn: 0,
     status: 'in-progress',
@@ -127,22 +112,22 @@ test('playing sly deal as your last card', () => {
         properties: [],
         sets: [
           {
-            complete: false,
-            color: 'purple',
+            complete: true,
+            color: 'blue',
             cards: [
               {
-                id: 'property-purple-st-charles',
+                id: 'property-blue-park-place',
                 type: 'property',
-                name: 'st-charles',
-                color: 'purple',
-                value: 2,
+                name: 'park-place',
+                color: 'blue',
+                value: 4,
               },
               {
-                id: 'property-purple-states-ave',
+                id: 'property-blue-boardwalk',
                 type: 'property',
-                name: 'states-ave',
-                color: 'purple',
-                value: 2,
+                name: 'boardwalk',
+                color: 'blue',
+                value: 4,
               },
             ],
           },
@@ -158,10 +143,10 @@ test('playing sly deal as your last card', () => {
         sets: [],
         hand: [
           {
-            id: 'action-sly-deal-0',
+            id: 'action-dealbreaker-0',
             type: 'action',
-            value: 3,
-            name: 'sly-deal',
+            value: 5,
+            name: 'dealbreaker',
           },
           { id: 'cash-val-1-4', type: 'cash', value: 1 },
           { id: 'cash-val-1-5', type: 'cash', value: 1 },
@@ -171,6 +156,7 @@ test('playing sly deal as your last card', () => {
     order: ['p2', 'p1'],
     winner: null,
   };
+
   let newState = reducer(
     state,
     actionCreators.playCard('p2', state.players['p2'].hand[2])
@@ -192,55 +178,40 @@ test('playing sly deal as your last card', () => {
   expect(newState.tasks.length).toBe(2);
   expect(newState.tasks[1].to).toBe('p2');
   expect(newState.tasks[1].from).toBe('p2');
-  expect(newState.tasks[1].type).toBe(taskTypes.selectCardToSteal);
+  expect(newState.tasks[1].type).toBe(taskTypes.selectSetToSteal);
   expect(newState.tasks[0].to).toBe('p1');
   expect(newState.tasks[0].from).toBe('p1');
   expect(newState.tasks[0].type).toBe(taskTypes.drawCards);
   expect(newState.players['p2'].hand.length).toBe(0);
   expect(newState.discard.length).toBe(1);
-  expect(newState.discard[0].id).toBe('action-sly-deal-0');
-
-  const cardToSteal = newState.players['p1'].sets[0].cards[0];
+  expect(newState.discard[0].id).toBe('action-dealbreaker-0');
 
   newState = reducer(
     newState,
-    actionCreators.resolveSelectCardToSteal('p2', 'p1', cardToSteal)
+    actionCreators.resolveSelectSetToSteal('p2', 'p1', 0)
   );
 
   expect(newState.tasks.length).toBe(2);
   expect(newState.tasks[1].to).toBe('p1');
   expect(newState.tasks[1].from).toBe('p2');
-  expect(newState.tasks[1].type).toBe(taskTypes.surrenderCard);
-  expect(newState.tasks[1].payload.cardToSurrender.id).toBe(
-    'property-purple-st-charles'
-  );
+  expect(newState.tasks[1].type).toBe(taskTypes.surrenderSet);
+  expect(newState.tasks[1].payload.setToSurrenderIndex).toBe(0);
 
-  newState = reducer(newState, actionCreators.resolveSurrenderCard('p1'));
+  newState = reducer(newState, actionCreators.resolveSurrenderSet('p1'));
 
+  expect(newState.cardsPlayed).toBe(0);
   expect(newState.tasks.length).toBe(1);
   expect(newState.tasks[0].to).toBe('p1');
   expect(newState.tasks[0].from).toBe('p1');
   expect(newState.tasks[0].type).toBe(taskTypes.drawCards);
-  expect(newState.cardsPlayed).toBe(0);
-  expect(newState.order[newState.turn]).toBe('p1');
-  expect(newState.players['p1'].sets.length).toBe(1);
-  expect(newState.players['p1'].sets[0].cards.length).toBe(1);
-  expect(newState.players['p1'].sets[0].cards[0].id).toBe(
-    'property-purple-states-ave'
-  );
+  expect(newState.players['p1'].sets.length).toBe(0);
   expect(newState.players['p2'].sets.length).toBe(1);
-  expect(
-    Boolean(
-      newState.players['p2'].sets.find(
-        set =>
-          set.color === 'purple' &&
-          set.cards.find(c => c.id === 'property-purple-st-charles')
-      )
-    )
-  ).toBe(true);
+  expect(newState.players['p2'].sets[0].complete).toBe(true);
+  expect(newState.players['p2'].sets[0].color).toBe('blue');
+  expect(newState.players['p2'].sets[0].cards.length).toBe(2);
 });
 
-test('sly deal leading to a complete set', () => {
+test('stealing one of many sets from a player', () => {
   const state = {
     turn: 0,
     status: 'in-progress',
@@ -255,15 +226,42 @@ test('sly deal leading to a complete set', () => {
         properties: [],
         sets: [
           {
-            complete: false,
-            color: 'green',
+            complete: true,
+            color: 'blue',
             cards: [
               {
-                id: 'property-green-north-carolina',
+                id: 'property-blue-park-place',
                 type: 'property',
-                name: 'north-carolina',
-                color: 'green',
+                name: 'park-place',
+                color: 'blue',
                 value: 4,
+              },
+              {
+                id: 'property-blue-boardwalk',
+                type: 'property',
+                name: 'boardwalk',
+                color: 'blue',
+                value: 4,
+              },
+            ],
+          },
+          {
+            complete: true,
+            color: 'brown',
+            cards: [
+              {
+                id: 'property-brown-medditerranean',
+                type: 'property',
+                name: 'medditerranean',
+                color: 'brown',
+                value: 1,
+              },
+              {
+                id: 'property-brown-baltic',
+                type: 'property',
+                name: 'baltic',
+                color: 'brown',
+                value: 1,
               },
             ],
           },
@@ -276,34 +274,13 @@ test('sly deal leading to a complete set', () => {
         name: 'player 2',
         properties: [],
         cash: [],
-        sets: [
-          {
-            complete: false,
-            color: 'green',
-            cards: [
-              {
-                id: 'property-green-pennsylvania',
-                type: 'property',
-                name: 'pennsylvania',
-                color: 'green',
-                value: 4,
-              },
-              {
-                id: 'property-green-pacific',
-                type: 'property',
-                name: 'pacific',
-                color: 'green',
-                value: 4,
-              },
-            ],
-          },
-        ],
+        sets: [],
         hand: [
           {
-            id: 'action-sly-deal-0',
+            id: 'action-dealbreaker-0',
             type: 'action',
-            value: 3,
-            name: 'sly-deal',
+            value: 5,
+            name: 'dealbreaker',
           },
         ],
       },
@@ -320,44 +297,36 @@ test('sly deal leading to a complete set', () => {
   expect(newState.tasks.length).toBe(1);
   expect(newState.tasks[0].to).toBe('p2');
   expect(newState.tasks[0].from).toBe('p2');
-  expect(newState.tasks[0].type).toBe(taskTypes.selectCardToSteal);
+  expect(newState.tasks[0].type).toBe(taskTypes.selectSetToSteal);
   expect(newState.discard.length).toBe(1);
-  expect(newState.discard[0].id).toBe('action-sly-deal-0');
-
-  const cardToSteal = newState.players['p1'].sets[0].cards[0];
+  expect(newState.discard[0].id).toBe('action-dealbreaker-0');
 
   newState = reducer(
     newState,
-    actionCreators.resolveSelectCardToSteal('p2', 'p1', cardToSteal)
+    actionCreators.resolveSelectSetToSteal('p2', 'p1', 0)
   );
 
   expect(newState.tasks.length).toBe(1);
   expect(newState.tasks[0].to).toBe('p1');
   expect(newState.tasks[0].from).toBe('p2');
-  expect(newState.tasks[0].type).toBe(taskTypes.surrenderCard);
-  expect(newState.tasks[0].payload.cardToSurrender.id).toBe(
-    'property-green-north-carolina'
-  );
+  expect(newState.tasks[0].type).toBe(taskTypes.surrenderSet);
+  expect(newState.tasks[0].payload.setToSurrenderIndex).toBe(0);
 
-  newState = reducer(newState, actionCreators.resolveSurrenderCard('p1'));
+  newState = reducer(newState, actionCreators.resolveSurrenderSet('p1'));
 
   expect(newState.tasks.length).toBe(0);
   expect(newState.cardsPlayed).toBe(1);
-  expect(newState.players['p1'].sets.length).toBe(0);
+  expect(newState.players['p1'].sets.length).toBe(1);
+  expect(newState.players['p1'].sets[0].complete).toBe(true);
+  expect(newState.players['p1'].sets[0].color).toBe('brown');
+  expect(newState.players['p1'].sets[0].cards.length).toBe(2);
+  expect(newState.players['p2'].sets.length).toBe(1);
   expect(newState.players['p2'].sets[0].complete).toBe(true);
-  expect(
-    Boolean(
-      newState.players['p2'].sets.find(
-        set =>
-          set.complete &&
-          set.color === 'green' &&
-          set.cards.find(c => c.id === 'property-green-north-carolina')
-      )
-    )
-  ).toBe(true);
+  expect(newState.players['p2'].sets[0].color).toBe('blue');
+  expect(newState.players['p2'].sets[0].cards.length).toBe(2);
 });
 
-test('sly deal leading to a win', () => {
+test('dealbreaker leading to a win', () => {
   const state = {
     turn: 0,
     status: 'in-progress',
@@ -370,11 +339,20 @@ test('sly deal leading to a win', () => {
         id: 'p1',
         name: 'player 1',
         properties: [],
+        cash: [],
+        hand: [],
         sets: [
           {
-            complete: false,
+            complete: true,
             color: 'mint',
             cards: [
+              {
+                id: 'property-mint-water-works',
+                type: 'property',
+                name: 'water-works',
+                color: 'mint',
+                value: 2,
+              },
               {
                 id: 'property-mint-electric-company',
                 type: 'property',
@@ -385,8 +363,6 @@ test('sly deal leading to a win', () => {
             ],
           },
         ],
-        cash: [],
-        hand: [],
       },
       p2: {
         id: 'p2',
@@ -434,26 +410,13 @@ test('sly deal leading to a win', () => {
               },
             ],
           },
-          {
-            complete: false,
-            color: 'mint',
-            cards: [
-              {
-                id: 'property-mint-water-works',
-                type: 'property',
-                name: 'water-works',
-                color: 'mint',
-                value: 2,
-              },
-            ],
-          },
         ],
         hand: [
           {
-            id: 'action-sly-deal-0',
+            id: 'action-dealbreaker-0',
             type: 'action',
-            value: 3,
-            name: 'sly-deal',
+            value: 5,
+            name: 'dealbreaker',
           },
         ],
       },
@@ -465,37 +428,32 @@ test('sly deal leading to a win', () => {
     state,
     actionCreators.playCard('p2', state.players['p2'].hand[0])
   );
-  const cardToSteal = newState.players['p1'].sets[0].cards[0];
+  expect(newState.cardsPlayed).toBe(1);
+  expect(newState.players['p2'].hand.length).toBe(0);
+  expect(newState.tasks.length).toBe(1);
+  expect(newState.tasks[0].to).toBe('p2');
+  expect(newState.tasks[0].from).toBe('p2');
+  expect(newState.tasks[0].type).toBe(taskTypes.selectSetToSteal);
+  expect(newState.discard.length).toBe(1);
+  expect(newState.discard[0].id).toBe('action-dealbreaker-0');
 
   newState = reducer(
     newState,
-    actionCreators.resolveSelectCardToSteal('p2', 'p1', cardToSteal)
+    actionCreators.resolveSelectSetToSteal('p2', 'p1', 0)
   );
 
   expect(newState.tasks.length).toBe(1);
   expect(newState.tasks[0].to).toBe('p1');
   expect(newState.tasks[0].from).toBe('p2');
-  expect(newState.tasks[0].type).toBe(taskTypes.surrenderCard);
-  expect(newState.tasks[0].payload.cardToSurrender.id).toBe(
-    'property-mint-electric-company'
-  );
+  expect(newState.tasks[0].type).toBe(taskTypes.surrenderSet);
+  expect(newState.tasks[0].payload.setToSurrenderIndex).toBe(0);
 
-  newState = reducer(newState, actionCreators.resolveSurrenderCard('p1'));
+  newState = reducer(newState, actionCreators.resolveSurrenderSet('p1'));
 
   expect(newState.tasks.length).toBe(0);
   expect(newState.cardsPlayed).toBe(1);
   expect(newState.players['p1'].sets.length).toBe(0);
-  expect(newState.players['p2'].sets[0].complete).toBe(true);
-  expect(newState.players['p2'].sets.every(set => set.complete)).toBe(true);
+  expect(newState.players['p2'].sets.length).toBe(3);
+  expect(newState.players['p2'].sets.every(set => set.complete));
   expect(newState.winner).toBe('p2');
-  expect(
-    Boolean(
-      newState.players['p2'].sets.find(
-        set =>
-          set.complete &&
-          set.color === 'mint' &&
-          set.cards.find(c => c.id === 'property-mint-electric-company')
-      )
-    )
-  ).toBe(true);
 });

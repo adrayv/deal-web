@@ -22,6 +22,8 @@ export const actionTypes = {
     discardCards: '@resolve-discard-cards',
     selectCardToSteal: '@resolve-select-card-to-steal',
     surrenderCard: '@resolve-surrender-card',
+    selectSetToSteal: '@resolve-select-set-steal',
+    surrenderSet: '@resolve-surrender-set',
   },
   endTurn: '@end-turn',
 };
@@ -82,6 +84,22 @@ export const actionCreators = {
       data: { playerId },
     };
   },
+  resolveSelectSetToSteal(attackerId, victimId, setToStealIndex) {
+    return {
+      type: actionTypes.resolveTask.selectSetToSteal,
+      data: {
+        attackerId,
+        victimId,
+        setToStealIndex,
+      },
+    };
+  },
+  resolveSurrenderSet(playerId) {
+    return {
+      type: actionTypes.resolveTask.surrenderSet,
+      data: { playerId },
+    };
+  },
   endTurn(playerId) {
     return {
       type: actionTypes.endTurn,
@@ -105,6 +123,8 @@ export const taskTypes = {
   discardCards: '@task-discard-cards',
   surrenderCard: '@task-surrender-card',
   selectCardToSteal: '@task-select-card-to-steal',
+  surrenderSet: '@task-surrender-set',
+  selectSetToSteal: '@task-select-set-to-steal',
 };
 
 const taskCreators = {
@@ -141,6 +161,24 @@ const taskCreators = {
   selectCardToSteal(playerId) {
     return {
       type: taskTypes.selectCardToSteal,
+      from: playerId,
+      to: playerId,
+      payload: {},
+    };
+  },
+  surrenderSet(attackerId, victimId, setToSurrenderIndex) {
+    return {
+      type: taskTypes.surrenderSet,
+      from: attackerId,
+      to: victimId,
+      payload: {
+        setToSurrenderIndex,
+      },
+    };
+  },
+  selectSetToSteal(playerId) {
+    return {
+      type: taskTypes.selectSetToSteal,
       from: playerId,
       to: playerId,
       payload: {},
@@ -300,6 +338,10 @@ export function reducer(state, action) {
                 newState.tasks.push(taskCreators.selectCardToSteal(playerId));
                 break;
               }
+              case 'dealbreaker': {
+                newState.tasks.push(taskCreators.selectSetToSteal(playerId));
+                break;
+              }
               default: {
                 // continue
               }
@@ -440,6 +482,47 @@ export function reducer(state, action) {
             cards: [cardToSurrender],
           });
         }
+        if (playerWon(attackerId, newState)) {
+          newState.winner = attackerId;
+          newState.status = gameStatuses.done;
+        }
+      }
+      return newState;
+    }
+    case actionTypes.resolveTask.selectSetToSteal: {
+      const { attackerId, victimId, setToStealIndex } = action.data;
+      const newState = Object.assign({}, state);
+      if (
+        attackerId !== victimId &&
+        state.players[victimId].sets[setToStealIndex]
+      ) {
+        newState.tasks.pop();
+        newState.tasks.push(
+          taskCreators.surrenderSet(attackerId, victimId, setToStealIndex)
+        );
+      }
+      return newState;
+    }
+    case actionTypes.resolveTask.surrenderSet: {
+      const { playerId } = action.data;
+      let newState = Object.assign({}, state);
+      if (playerId === state.tasks[state.tasks.length - 1].to) {
+        const taskToResolve = newState.tasks.pop();
+        const {
+          from: attackerId,
+          to: victimId,
+          payload: { setToSurrenderIndex },
+        } = taskToResolve;
+
+        const setToSurrender =
+          newState.players[victimId].sets[setToSurrenderIndex];
+        newState.players[victimId].sets[setToSurrenderIndex] = null;
+        newState.players[victimId].sets = newState.players[
+          victimId
+        ].sets.filter(s => s);
+
+        newState.players[attackerId].sets.push(setToSurrender);
+
         if (playerWon(attackerId, newState)) {
           newState.winner = attackerId;
           newState.status = gameStatuses.done;
