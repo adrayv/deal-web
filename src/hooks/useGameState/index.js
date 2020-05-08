@@ -158,6 +158,25 @@ export const GameStateProvider = ({ children }) => {
     return cardsToSteal;
   }, [otherPlayers]);
 
+  const getSetsToSteal = useCallback(() => {
+    const setsToSteal = []; // {owner: {id, name}, id, ...set}
+    otherPlayers.forEach(player => {
+      player.sets.forEach(set => {
+        if (set.complete) {
+          setsToSteal.push({
+            id: `${player.id}-${set.color}`,
+            owner: {
+              id: player.id,
+              name: player.name,
+            },
+            ...set,
+          });
+        }
+      });
+    });
+    return setsToSteal;
+  }, [otherPlayers]);
+
   return (
     <Provider
       value={{
@@ -184,6 +203,7 @@ export const GameStateProvider = ({ children }) => {
         getMainPlayerActionsInHand,
         getMainPlayerSets,
         getCardsToSteal,
+        getSetsToSteal,
         isMainPlayersTurn,
         gameHasOpenTasks,
         mainPlayerHasAnOpenTask,
