@@ -387,6 +387,10 @@ export function reducer(state, action) {
       const taskToResolve = newState.tasks[newState.tasks.length - 1];
       if (taskToResolve.to === playerId) {
         const { numCardsToDraw } = taskToResolve.payload;
+        if (numCardsToDraw > newState.deck.length) {
+          newState.deck = shuffle([...newState.deck, ...newState.discard]);
+          newState.discard = [];
+        }
         for (let i = 0; i < numCardsToDraw; i++) {
           newState.players[playerId].hand.push(newState.deck.pop());
         }

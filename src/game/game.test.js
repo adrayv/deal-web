@@ -297,6 +297,42 @@ test('drawing a card', () => {
   ).toBe(true);
 });
 
+test('when number of cards to be drawn > cards in deck', () => {
+  const state = {
+    turn: 0,
+    status: 'in-progress',
+    cardsPlayed: 0,
+    deck: [{ id: 'cash-val-1-0', type: 'cash', value: 1 }],
+    discard: [{ id: 'cash-val-1-4', type: 'cash', value: 1 }],
+    tasks: [],
+    players: {
+      p1: {
+        id: 'p1',
+        name: 'player 1',
+        properties: [],
+        sets: [],
+        cash: [],
+        hand: [{ id: 'cash-val-1-4', type: 'cash', value: 1 }],
+      },
+      p2: {
+        id: 'p2',
+        name: 'player 2',
+        properties: [],
+        cash: [],
+        sets: [],
+        hand: [{ id: 'cash-val-1-5', type: 'cash', value: 1 }],
+      },
+    },
+    order: ['p2', 'p1'],
+    winner: null,
+  };
+  let newState = reducer(state, actionCreators.endTurn('p2'));
+  newState = reducer(state, actionCreators.resolveDrawCards('p1'));
+  expect(newState.players['p1'].hand.length).toBe(3);
+  expect(newState.deck.length).toBe(0);
+  expect(newState.discard.length).toBe(0);
+});
+
 test('ending a turn', () => {
   const state = {
     turn: 0,
