@@ -1,9 +1,7 @@
 import { reducer, actionCreators, taskTypes, gameStatuses } from 'game/core';
 
 /*
-	- sly deal getting just-say-no'd
 	- trying to play a sly deal card when there's nothing to steal
-  - say no: playing a sly deal in response to a from-to action (can say no to [say-no, sly-deal, forced-deal, charge, dealbreaker])
 */
 
 test('playing a sly deal card', () => {

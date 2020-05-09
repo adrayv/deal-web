@@ -25,6 +25,7 @@ export const actionTypes = {
     selectSetToSteal: '@resolve-select-set-steal',
     surrenderSet: '@resolve-surrender-set',
   },
+  sayNo: '@say-no',
   endTurn: '@end-turn',
 };
 
@@ -98,6 +99,14 @@ export const actionCreators = {
     return {
       type: actionTypes.resolveTask.surrenderSet,
       data: { playerId },
+    };
+  },
+  sayNo(playerId) {
+    return {
+      type: actionTypes.sayNo,
+      data: {
+        playerId,
+      },
     };
   },
   endTurn(playerId) {
@@ -530,6 +539,39 @@ export function reducer(state, action) {
         if (playerWon(attackerId, newState)) {
           newState.winner = attackerId;
           newState.status = gameStatuses.done;
+        }
+      }
+      return newState;
+    }
+    case actionTypes.sayNo: {
+      const newState = Object.assign({}, state);
+      const { playerId } = action.data;
+      const lastTask = newState.tasks[newState.tasks.length - 1];
+      const sayNoIndex = newState.players[playerId].hand.findIndex(
+        card => card.name === 'say-no'
+      );
+      if (
+        lastTask &&
+        lastTask.to === playerId &&
+        lastTask.from !== playerId &&
+        sayNoIndex !== -1
+      ) {
+        newState.tasks.pop();
+        newState.discard.push(newState.players[playerId].hand[sayNoIndex]);
+        newState.players[playerId].hand[sayNoIndex] = null;
+        newState.players[playerId].hand = newState.players[
+          playerId
+        ].hand.filter(c => c);
+        // if next player was set to draw 2 cards next turn but now they have to draw 5
+        if (
+          newState.players[playerId].hand.length === 0 &&
+          newState.tasks.length >= 1 &&
+          newState.tasks[0].type === taskTypes.drawCards &&
+          newState.tasks[0].from === playerId &&
+          newState.tasks[0].to === playerId &&
+          newState.tasks[0].payload.numCardsToDraw === 2
+        ) {
+          newState.tasks[0] = taskCreators.drawCards(playerId, 5);
         }
       }
       return newState;

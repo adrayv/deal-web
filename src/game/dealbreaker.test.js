@@ -1,7 +1,6 @@
 import { reducer, actionCreators, taskTypes, gameStatuses } from 'game/core';
 
 /*
-	- dealbreaker getting just-say-no'd
 	- trying to play a dealbreaker when there's nothing to steal
 */
 

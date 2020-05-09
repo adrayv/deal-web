@@ -48,10 +48,10 @@ const types = {
       value: 5,
       count: 2,
     },
-    // 'say-no': {
-    //   value: 4,
-    //   count: 3,
-    // },
+    'say-no': {
+      value: 4,
+      count: 3,
+    },
     'pass-go': {
       value: 1,
       count: 10,
