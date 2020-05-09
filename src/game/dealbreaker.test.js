@@ -1,4 +1,4 @@
-import { reducer, actionCreators, taskTypes } from 'game/core';
+import { reducer, actionCreators, taskTypes, gameStatuses } from 'game/core';
 
 /*
 	- dealbreaker getting just-say-no'd
@@ -456,4 +456,5 @@ test('dealbreaker leading to a win', () => {
   expect(newState.players['p2'].sets.length).toBe(3);
   expect(newState.players['p2'].sets.every(set => set.complete));
   expect(newState.winner).toBe('p2');
+  expect(newState.status).toBe(gameStatuses.done);
 });

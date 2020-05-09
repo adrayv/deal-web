@@ -1,4 +1,4 @@
-import { reducer, actionCreators, taskTypes } from 'game/core';
+import { reducer, actionCreators, taskTypes, gameStatuses } from 'game/core';
 
 /*
 	- sly deal getting just-say-no'd
@@ -488,6 +488,7 @@ test('sly deal leading to a win', () => {
   expect(newState.players['p2'].sets[0].complete).toBe(true);
   expect(newState.players['p2'].sets.every(set => set.complete)).toBe(true);
   expect(newState.winner).toBe('p2');
+  expect(newState.status).toBe(gameStatuses.done);
   expect(
     Boolean(
       newState.players['p2'].sets.find(

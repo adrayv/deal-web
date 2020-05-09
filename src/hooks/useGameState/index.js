@@ -52,6 +52,7 @@ export const GameStateProvider = ({ children }) => {
   }, [gameId]);
 
   const gameStatus = gameState && gameState.status;
+  const gameWinner = gameState && gameState.winner;
   const players =
     gameState && gameState.order.map(pid => gameState.players[pid]);
   const playersObj = gameState && gameState.players;
@@ -88,6 +89,10 @@ export const GameStateProvider = ({ children }) => {
     () => gameStatus === gameStatuses.inProgress,
     [gameStatus]
   );
+  const gameHasEnded = useCallback(() => gameStatus === gameStatuses.done, [
+    gameStatus,
+  ]);
+  const getGameWinner = useCallback(() => gameWinner, [gameWinner]);
   const getOtherPlayerIds = useCallback(() => otherPlayerIds, [otherPlayerIds]);
   const getOtherPlayerCash = useCallback(
     pid => playersObj && playersObj[pid] && playersObj[pid].cash,
@@ -188,6 +193,8 @@ export const GameStateProvider = ({ children }) => {
         getPlayerById,
         canStartGame,
         gameHasStarted,
+        gameHasEnded,
+        getGameWinner,
         getOtherPlayerIds,
         getOtherPlayerCash,
         getOtherPlayerName,
