@@ -8,11 +8,21 @@ export default () => {
   const {
     getMainPlayerOpenTask,
     playerId,
+    mainPlayerCanSayNo,
     getMainPlayerSets,
     getPlayerById,
   } = useGameState();
   const task = getMainPlayerOpenTask();
   const { pushAction } = usePushAction();
+
+  /* test rerendering/memoization here */
+  const canSayNo = mainPlayerCanSayNo();
+
+  const sayNoHandler = useCallback(() => {
+    if (canSayNo) {
+      pushAction(actionCreators.sayNo(playerId));
+    }
+  }, [pushAction, playerId, canSayNo]);
 
   const submitHandler = useCallback(() => {
     pushAction(actionCreators.resolveSurrenderSet(playerId));
@@ -24,6 +34,8 @@ export default () => {
     const setToSurrender = getMainPlayerSets()[setToSurrenderIndex];
     return (
       <View
+        onSayNo={sayNoHandler}
+        canSayNo={canSayNo}
         setToSurrender={setToSurrender}
         attackerName={attacker.name}
         onConfirm={submitHandler}

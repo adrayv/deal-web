@@ -73,7 +73,12 @@ export const GameStateProvider = ({ children }) => {
   const mainPlayerHandProperties =
     mainPlayerHand && mainPlayerHand.filter(card => card.type === 'property');
   const mainPlayerHandActions =
-    mainPlayerHand && mainPlayerHand.filter(card => card.type === 'action');
+    mainPlayerHand &&
+    mainPlayerHand.filter(
+      card => card.type === 'action' && card.name !== 'say-no'
+    );
+  const mainPlayerSayNos =
+    mainPlayerHand && mainPlayerHand.filter(card => card.name === 'say-no');
   const mainPlayerSets = mainPlayer && mainPlayer.sets;
   const currentPlayer = gameState && gameState.order[gameState.turn];
   const numTasks = gameState && gameState.tasks && gameState.tasks.length;
@@ -143,6 +148,9 @@ export const GameStateProvider = ({ children }) => {
     () => nextTask && nextTask.to === playerId && nextTask,
     [playerId, nextTask]
   );
+  const mainPlayerCanSayNo = useCallback(() => mainPlayerSayNos.length > 0, [
+    mainPlayerSayNos,
+  ]);
   const getCardsToSteal = useCallback(() => {
     const cardsToSteal = [];
     otherPlayers.forEach(player => {
@@ -214,6 +222,7 @@ export const GameStateProvider = ({ children }) => {
         isMainPlayersTurn,
         gameHasOpenTasks,
         mainPlayerHasAnOpenTask,
+        mainPlayerCanSayNo,
         getMainPlayerOpenTask,
       }}
     >

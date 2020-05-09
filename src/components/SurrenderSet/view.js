@@ -2,7 +2,13 @@ import React from 'react';
 import { Card, Button } from 'antd';
 import SetCard from 'components/SetCard';
 
-export default ({ setToSurrender, attackerName, onConfirm }) => (
+export default ({
+  setToSurrender,
+  attackerName,
+  onConfirm,
+  canSayNo,
+  onSayNo,
+}) => (
   <div>
     <Card size="small" title={'Set to be stolen from you'}>
       <p>
@@ -13,8 +19,11 @@ export default ({ setToSurrender, attackerName, onConfirm }) => (
         color={setToSurrender.color}
         isComplete={setToSurrender.complete}
       />
-      <Button block type="primary" onClick={onConfirm}>
-        Confirm
+      <Button block type="primary" onClick={onSayNo} disabled={!canSayNo}>
+        Say No
+      </Button>
+      <Button block type="danger" onClick={onConfirm}>
+        Allow
       </Button>
     </Card>
   </div>
