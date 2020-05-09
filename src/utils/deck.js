@@ -58,7 +58,7 @@ const types = {
     },
     'sly-deal': {
       value: 3,
-      count: 6,
+      count: 10,
     },
     // misc: {
     //   'debt-collector': {
