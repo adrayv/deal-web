@@ -60,11 +60,11 @@ const types = {
       value: 3,
       count: 10,
     },
+    'debt-collector': {
+      value: 3,
+      count: 3,
+    },
     // misc: {
-    //   'debt-collector': {
-    //     value: 3,
-    //     count: 3,
-    //   },
     //   'forced-deal': {
     //     value: 3,
     //     count: 3,

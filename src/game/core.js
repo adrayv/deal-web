@@ -24,6 +24,7 @@ export const actionTypes = {
     surrenderCard: '@resolve-surrender-card',
     selectSetToSteal: '@resolve-select-set-steal',
     surrenderSet: '@resolve-surrender-set',
+    selectPlayerToCharge: '@resolve-select-player-to-charge',
     payCharge: '@resolve-charge',
     goBankrupt: '@resolve-go-bankrupt',
   },
@@ -113,6 +114,15 @@ export const actionCreators = {
       },
     };
   },
+  resolveSelectPlayerToCharge(attackerId, victimId) {
+    return {
+      type: actionTypes.resolveTask.selectPlayerToCharge,
+      data: {
+        attackerId,
+        victimId,
+      },
+    };
+  },
   sayNo(playerId) {
     return {
       type: actionTypes.sayNo,
@@ -165,6 +175,7 @@ export const taskTypes = {
   surrenderSet: '@task-surrender-set',
   selectSetToSteal: '@task-select-set-to-steal',
   payCharge: '@task-pay-charge',
+  selectPlayerToCharge: '@task-select-player-to-charge',
 };
 
 const taskCreators = {
@@ -222,6 +233,16 @@ const taskCreators = {
       from: playerId,
       to: playerId,
       payload: {},
+    };
+  },
+  selectPlayerToCharge(playerId, amount) {
+    return {
+      type: taskTypes.selectPlayerToCharge,
+      from: playerId,
+      to: playerId,
+      payload: {
+        amount,
+      },
     };
   },
   payCharge(attackerId, victimId, amount) {
@@ -401,6 +422,12 @@ export function reducer(state, action) {
                     );
                   }
                 }
+                break;
+              }
+              case 'debt-collector': {
+                newState.tasks.push(
+                  taskCreators.selectPlayerToCharge(playerId, 5)
+                );
                 break;
               }
               default: {
@@ -634,6 +661,24 @@ export function reducer(state, action) {
           newState.winner = attackerId;
           newState.status = gameStatuses.done;
         }
+      }
+      return newState;
+    }
+    case actionTypes.resolveTask.selectPlayerToCharge: {
+      const newState = Object.assign({}, state);
+      const { attackerId, victimId } = action.data;
+      const lastTask = newState.tasks[newState.tasks.length - 1];
+      if (
+        lastTask &&
+        lastTask.from === attackerId &&
+        lastTask.to === attackerId &&
+        lastTask.type === taskTypes.selectPlayerToCharge &&
+        lastTask.payload.amount
+      ) {
+        newState.tasks.pop();
+        newState.tasks.push(
+          taskCreators.payCharge(attackerId, victimId, lastTask.payload.amount)
+        );
       }
       return newState;
     }
