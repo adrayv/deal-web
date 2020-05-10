@@ -24,8 +24,11 @@ export const actionTypes = {
     surrenderCard: '@resolve-surrender-card',
     selectSetToSteal: '@resolve-select-set-steal',
     surrenderSet: '@resolve-surrender-set',
+    payCharge: '@resolve-charge',
+    goBankrupt: '@resolve-go-bankrupt',
   },
   sayNo: '@say-no',
+  transferProperty: '@transfer-property',
   endTurn: '@end-turn',
 };
 
@@ -101,11 +104,38 @@ export const actionCreators = {
       data: { playerId },
     };
   },
+  resolveCharge(playerId, cardsToSurrender) {
+    return {
+      type: actionTypes.resolveTask.payCharge,
+      data: {
+        playerId,
+        cardsToSurrender,
+      },
+    };
+  },
   sayNo(playerId) {
     return {
       type: actionTypes.sayNo,
       data: {
         playerId,
+      },
+    };
+  },
+  goBankrupt(playerId) {
+    return {
+      type: actionTypes.resolveTask.goBankrupt,
+      data: {
+        playerId,
+      },
+    };
+  },
+  transferProperty(attackerId, victimId, property) {
+    return {
+      type: actionTypes.transferProperty,
+      data: {
+        attackerId,
+        victimId,
+        property,
       },
     };
   },
@@ -134,6 +164,7 @@ export const taskTypes = {
   selectCardToSteal: '@task-select-card-to-steal',
   surrenderSet: '@task-surrender-set',
   selectSetToSteal: '@task-select-set-to-steal',
+  payCharge: '@task-pay-charge',
 };
 
 const taskCreators = {
@@ -191,6 +222,16 @@ const taskCreators = {
       from: playerId,
       to: playerId,
       payload: {},
+    };
+  },
+  payCharge(attackerId, victimId, amount) {
+    return {
+      type: taskTypes.payCharge,
+      from: attackerId,
+      to: victimId,
+      payload: {
+        amount,
+      },
     };
   },
 };
@@ -351,6 +392,17 @@ export function reducer(state, action) {
                 newState.tasks.push(taskCreators.selectSetToSteal(playerId));
                 break;
               }
+              case 'birthday': {
+                for (let i = 0; i < newState.order.length; i++) {
+                  const playerToCharge = newState.order[i];
+                  if (playerToCharge !== playerId) {
+                    newState.tasks.push(
+                      taskCreators.payCharge(playerId, playerToCharge, 2)
+                    );
+                  }
+                }
+                break;
+              }
               default: {
                 // continue
               }
@@ -444,6 +496,48 @@ export function reducer(state, action) {
         newState.tasks.push(
           taskCreators.surrenderCard(attackerId, victimId, cardToSteal)
         );
+      }
+      return newState;
+    }
+    case actionTypes.transferProperty: {
+      const { attackerId, victimId, property } = action.data;
+      let newState = Object.assign({}, state);
+      const setToChangeIndex = newState.players[victimId].sets.findIndex(
+        set => !set.complete && set.cards.find(c => c.id === property.id)
+      );
+      const setToChange = newState.players[victimId].sets[setToChangeIndex];
+      newState.players[victimId].sets[setToChangeIndex] = {
+        ...setToChange,
+        cards: setToChange.cards.filter(c => c.id !== property.id),
+      };
+      // if the card taken was the only card in set
+      if (
+        newState.players[victimId].sets[setToChangeIndex].cards.length === 0
+      ) {
+        newState.players[victimId].sets[setToChangeIndex] = null;
+        newState.players[victimId].sets = newState.players[
+          victimId
+        ].sets.filter(s => s);
+      }
+
+      const targetSetIndex = newState.players[attackerId].sets.findIndex(
+        set => set.color === property.color && !set.complete
+      );
+      if (targetSetIndex !== -1) {
+        newState.players[attackerId].sets[targetSetIndex].cards.push(property);
+        if (setIsComplete(newState.players[attackerId].sets[targetSetIndex])) {
+          newState.players[attackerId].sets[targetSetIndex].complete = true;
+        }
+      } else {
+        newState.players[attackerId].sets.push({
+          color: property.color,
+          complete: false,
+          cards: [property],
+        });
+      }
+      if (playerWon(attackerId, newState)) {
+        newState.winner = attackerId;
+        newState.status = gameStatuses.done;
       }
       return newState;
     }
@@ -573,6 +667,85 @@ export function reducer(state, action) {
         ) {
           newState.tasks[0] = taskCreators.drawCards(playerId, 5);
         }
+      }
+      return newState;
+    }
+    case actionTypes.resolveTask.payCharge: {
+      let newState = Object.assign({}, state);
+      const { playerId, cardsToSurrender } = action.data;
+      const lastTask = newState.tasks[newState.tasks.length - 1];
+      const playerHasAllCardsToSurrender = cardsToSurrender.every(card => {
+        return (
+          newState.players[playerId].cash.find(c => c.id === card.id) ||
+          newState.players[playerId].sets.find(set =>
+            set.cards.find(p => p.id === card.id)
+          )
+        );
+      });
+      const cardsToSurrenderNetValue = cardsToSurrender.reduce(
+        (total, card) => {
+          return total + card.value;
+        },
+        0
+      );
+      if (
+        lastTask &&
+        lastTask.to === playerId &&
+        lastTask.from !== playerId &&
+        lastTask.type === taskTypes.payCharge &&
+        cardsToSurrenderNetValue >= lastTask.payload.amount &&
+        playerHasAllCardsToSurrender
+      ) {
+        cardsToSurrender.forEach(card => {
+          switch (card.type) {
+            case 'cash': {
+              newState.players[lastTask.from].cash.push(card);
+              newState.players[playerId].cash = newState.players[
+                playerId
+              ].cash.filter(c => c.id !== card.id);
+              break;
+            }
+            case 'property': {
+              newState = reducer(
+                newState,
+                actionCreators.transferProperty(lastTask.from, playerId, card)
+              );
+              break;
+            }
+            default: {
+              // continue
+            }
+          }
+        });
+        newState.tasks.pop();
+      }
+      return newState;
+    }
+    case actionTypes.resolveTask.goBankrupt: {
+      let newState = Object.assign({}, state);
+      const { playerId } = action.data;
+      const lastTask = newState.tasks[newState.tasks.length - 1];
+      if (
+        lastTask &&
+        lastTask.to === playerId &&
+        lastTask.from !== playerId &&
+        lastTask.type === taskTypes.payCharge
+      ) {
+        newState.players[playerId].cash.forEach(card => {
+          newState.players[lastTask.from].cash.push(card);
+          newState.players[playerId].cash = newState.players[
+            playerId
+          ].cash.filter(c => c.id !== card.id);
+        });
+        newState.players[playerId].sets.forEach(set => {
+          set.cards.forEach(card => {
+            newState = reducer(
+              newState,
+              actionCreators.transferProperty(lastTask.from, playerId, card)
+            );
+          });
+        });
+        newState.tasks.pop();
       }
       return newState;
     }

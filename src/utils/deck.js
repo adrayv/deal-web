@@ -73,10 +73,10 @@ const types = {
     //     value: 1,
     //     count: 2,
     //   },
-    //   birthday: {
-    //     value: 2,
-    //     count: 3,
-    //   },
+    birthday: {
+      value: 2,
+      count: 3,
+    },
     // },
   },
   properties: {
