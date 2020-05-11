@@ -8,6 +8,7 @@ import SurrenderSet from 'components/SurrenderSet';
 import PayCharge from 'components/PayCharge';
 import SelectPlayerToPayDebt from 'components/SelectPlayerToPayDebt';
 import SelectColorToRent from 'components/SelectColorToRent';
+import SelectPlayerAndColorToRent from 'components/SelectPlayerAndColorToRent';
 
 export default () => (
   <>
@@ -19,6 +20,7 @@ export default () => (
     <SurrenderSet />
     <SelectPlayerToPayDebt />
     <SelectColorToRent />
+    <SelectPlayerAndColorToRent />
     <PayCharge />
   </>
 );

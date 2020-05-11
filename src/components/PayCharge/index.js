@@ -23,6 +23,7 @@ export default () => {
 
   const runningTotal = selectedCards
     .map(cardId => mainPlayerCashAndProperties.find(card => card.id === cardId))
+    .filter(c => c)
     .reduce((total, card) => {
       return total + card.value;
     }, 0);

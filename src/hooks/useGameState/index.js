@@ -171,11 +171,11 @@ export const GameStateProvider = ({ children }) => {
         if (!set.complete) {
           set.cards.forEach(card => {
             cardsToSteal.push({
+              ...card,
               owner: {
                 id: player.id,
                 name: player.name,
               },
-              ...card,
             });
           });
         }

@@ -438,6 +438,86 @@ test('paying a charge leads to a win', () => {
   );
 });
 
+test('paying a charge using a card from a complete set', () => {
+  const state = {
+    turn: 0,
+    status: 'in-progress',
+    cardsPlayed: 0,
+    tasks: [],
+    deck: [],
+    discard: [],
+    players: {
+      p1: {
+        id: 'p1',
+        name: 'player 1',
+        properties: [],
+        sets: [
+          {
+            complete: true,
+            color: 'blue',
+            cards: [
+              {
+                id: 'property-blue-park-place',
+                type: 'property',
+                name: 'park-place',
+                color: 'blue',
+                value: 4,
+              },
+              {
+                id: 'property-blue-boardwalk',
+                type: 'property',
+                name: 'boardwalk',
+                color: 'blue',
+                value: 4,
+              },
+            ],
+          },
+        ],
+        cash: [],
+        hand: [],
+      },
+      p2: {
+        id: 'p2',
+        name: 'player 2',
+        properties: [],
+        cash: [],
+        sets: [],
+        hand: [
+          {
+            id: 'action-birthday-0',
+            type: 'action',
+            value: 2,
+            name: 'birthday',
+          },
+        ],
+      },
+    },
+    order: ['p2', 'p1'],
+    winner: null,
+  };
+
+  let newState = reducer(
+    state,
+    actionCreators.playCard('p2', state.players.p2.hand[0])
+  );
+
+  newState = reducer(
+    newState,
+    actionCreators.resolveCharge('p1', [newState.players.p1.sets[0].cards[0]])
+  );
+
+  expect(newState.tasks.length).toBe(0);
+  expect(newState.cardsPlayed).toBe(1);
+  expect(newState.players.p1.sets.length).toBe(1);
+  expect(newState.players.p1.sets[0].cards[0].name).toBe('boardwalk');
+  expect(newState.players.p1.sets[0].complete).toBe(false);
+
+  expect(newState.players.p2.sets.length).toBe(1);
+  expect(newState.players.p2.sets[0].color).toBe('blue');
+  expect(newState.players.p2.sets[0].complete).toBe(false);
+  expect(newState.players.p2.sets[0].cards[0].name).toBe('park-place');
+});
+
 test('issuing a charge as your last move', () => {
   const state = {
     turn: 0,
