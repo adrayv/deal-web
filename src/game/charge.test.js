@@ -537,12 +537,25 @@ test('bankrupting someone', () => {
         sets: [
           {
             complete: false,
+            color: 'mint',
+            cards: [
+              {
+                id: 'property-mint-electric-company',
+                type: 'property',
+                name: 'electric-company',
+                color: 'mint',
+                value: 2,
+              },
+            ],
+          },
+          {
+            complete: false,
             color: 'brown',
             cards: [
               {
-                id: 'property-brown-baltic',
+                id: 'property-brown-medditerranean',
                 type: 'property',
-                name: 'baltic',
+                name: 'medditerranean',
                 color: 'brown',
                 value: 1,
               },
@@ -587,8 +600,131 @@ test('bankrupting someone', () => {
   expect(newState.players.p2.cash.length).toBe(1);
   expect(newState.players.p2.cash[0].id).toBe('cash-val-1-0');
 
-  expect(newState.players.p2.sets.length).toBe(1);
-  expect(newState.players.p2.sets[0].cards[0].id).toBe('property-brown-baltic');
+  expect(newState.players.p2.sets.length).toBe(2);
+  expect(newState.players.p2.sets[0].cards[0].id).toBe(
+    'property-mint-electric-company'
+  );
+  expect(newState.players.p2.sets[1].cards[0].id).toBe(
+    'property-brown-medditerranean'
+  );
+});
+
+test('bankrupting someone who has a complete set', () => {
+  const state = {
+    turn: 0,
+    status: 'in-progress',
+    cardsPlayed: 0,
+    tasks: [],
+    deck: [],
+    discard: [],
+    players: {
+      p1: {
+        id: 'p1',
+        name: 'player 1',
+        properties: [],
+        sets: [
+          {
+            complete: true,
+            color: 'blue',
+            cards: [
+              {
+                id: 'property-blue-park-place',
+                type: 'property',
+                name: 'park-place',
+                color: 'blue',
+                value: 4,
+              },
+              {
+                id: 'property-blue-boardwalk',
+                type: 'property',
+                name: 'boardwalk',
+                color: 'blue',
+                value: 4,
+              },
+            ],
+          },
+          {
+            complete: false,
+            color: 'brown',
+            cards: [
+              {
+                id: 'property-brown-medditerranean',
+                type: 'property',
+                name: 'medditerranean',
+                color: 'brown',
+                value: 1,
+              },
+            ],
+          },
+          {
+            complete: true,
+            color: 'mint',
+            cards: [
+              {
+                id: 'property-mint-water-works',
+                type: 'property',
+                name: 'water-works',
+                color: 'mint',
+                value: 2,
+              },
+              {
+                id: 'property-mint-electric-company',
+                type: 'property',
+                name: 'electric-company',
+                color: 'mint',
+                value: 2,
+              },
+            ],
+          },
+        ],
+        cash: [{ id: 'cash-val-1-0', type: 'cash', value: 1 }],
+        hand: [],
+      },
+      p2: {
+        id: 'p2',
+        name: 'player 2',
+        properties: [],
+        cash: [],
+        sets: [],
+        hand: [
+          {
+            id: 'action-birthday-0',
+            type: 'action',
+            value: 2,
+            name: 'birthday',
+          },
+        ],
+      },
+    },
+    order: ['p2', 'p1'],
+    winner: null,
+  };
+
+  let newState = reducer(
+    state,
+    actionCreators.playCard('p2', state.players.p2.hand[0])
+  );
+
+  newState = reducer(newState, actionCreators.goBankrupt('p1'));
+
+  expect(newState.tasks.length).toBe(0);
+  expect(newState.cardsPlayed).toBe(1);
+  expect(newState.players.p1.sets.length).toBe(0);
+
+  expect(newState.players.p1.cash.length).toBe(0);
+  expect(newState.players.p2.cash.length).toBe(1);
+  expect(newState.players.p2.cash[0].id).toBe('cash-val-1-0');
+
+  expect(newState.players.p2.sets.length).toBe(3);
+  expect(newState.players.p2.sets[0].color).toBe('blue');
+  expect(newState.players.p2.sets[0].cards.length).toBe(2);
+  expect(newState.players.p2.sets[0].complete).toBe(true);
+  expect(newState.players.p2.sets[1].cards[0].id).toBe(
+    'property-brown-medditerranean'
+  );
+  expect(newState.players.p2.sets[2].cards.length).toBe(2);
+  expect(newState.players.p2.sets[2].color).toBe('mint');
+  expect(newState.players.p2.sets[2].complete).toBe(true);
 });
 
 test('bankrupting someone leads to a complete set', () => {

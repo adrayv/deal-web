@@ -888,12 +888,25 @@ export function reducer(state, action) {
           ].cash.filter(c => c.id !== card.id);
         });
         newState.players[playerId].sets.forEach(set => {
-          set.cards.forEach(card => {
-            newState = reducer(
-              newState,
-              actionCreators.transferProperty(lastTask.from, playerId, card)
-            );
-          });
+          if (set.complete) {
+            newState.players[playerId].sets = newState.players[
+              playerId
+            ].sets.filter(s => s.color !== set.color);
+
+            newState.players[lastTask.from].sets.push(set);
+
+            if (playerWon(lastTask.from, newState)) {
+              newState.winner = lastTask.from;
+              newState.status = gameStatuses.done;
+            }
+          } else {
+            set.cards.forEach(card => {
+              newState = reducer(
+                newState,
+                actionCreators.transferProperty(lastTask.from, playerId, card)
+              );
+            });
+          }
         });
         newState.tasks.pop();
       }

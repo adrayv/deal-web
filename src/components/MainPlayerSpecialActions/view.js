@@ -6,6 +6,7 @@ import SurrenderCard from 'components/SurrenderCard';
 import SelectSetToSteal from 'components/SelectSetToSteal';
 import SurrenderSet from 'components/SurrenderSet';
 import PayCharge from 'components/PayCharge';
+import SelectPlayerToPayDebt from 'components/SelectPlayerToPayDebt';
 
 export default () => (
   <>
@@ -15,6 +16,7 @@ export default () => (
     <SurrenderCard />
     <SelectSetToSteal />
     <SurrenderSet />
+    <SelectPlayerToPayDebt />
     <PayCharge />
   </>
 );
