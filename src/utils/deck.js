@@ -101,11 +101,11 @@ const types = {
     },
     'sly-deal': {
       value: 3,
-      count: 10,
+      count: 6,
     },
     'debt-collector': {
       value: 3,
-      count: 3,
+      count: 4,
     },
     // misc: {
     //   'forced-deal': {
@@ -118,7 +118,7 @@ const types = {
     //   },
     birthday: {
       value: 2,
-      count: 3,
+      count: 4,
     },
     // },
   },

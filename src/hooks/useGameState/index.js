@@ -75,7 +75,9 @@ export const GameStateProvider = ({ children }) => {
   const mainPlayerHandActions =
     mainPlayerHand &&
     mainPlayerHand.filter(
-      card => card.type === 'action' && card.name !== 'say-no'
+      card =>
+        (card.type === 'action' && card.name !== 'say-no') ||
+        card.type === 'rent'
     );
   const mainPlayerSayNos =
     mainPlayerHand && mainPlayerHand.filter(card => card.name === 'say-no');
@@ -99,6 +101,13 @@ export const GameStateProvider = ({ children }) => {
   ]);
   const getGameWinner = useCallback(() => gameWinner, [gameWinner]);
   const getOtherPlayerIds = useCallback(() => otherPlayerIds, [otherPlayerIds]);
+  const getOtherPlayers = useCallback(
+    () =>
+      otherPlayerIds
+        .filter(id => id !== mainPlayerId)
+        .map(id => gameState.players[id]),
+    [otherPlayerIds, gameState, mainPlayerId]
+  );
   const getOtherPlayerCash = useCallback(
     pid => playersObj && playersObj[pid] && playersObj[pid].cash,
     [playersObj]
@@ -135,6 +144,10 @@ export const GameStateProvider = ({ children }) => {
   ]);
   const getMainPlayerSets = useCallback(() => mainPlayerSets, [mainPlayerSets]);
   const getMainPlayerCash = useCallback(() => mainPlayerCash, [mainPlayerCash]);
+  const getMainPlayerCashAndProperties = useCallback(
+    () => [...mainPlayerCash, ...mainPlayerSets.flatMap(set => set.cards)],
+    [mainPlayerCash, mainPlayerSets]
+  );
   const isMainPlayersTurn = useCallback(() => currentPlayer === playerId, [
     currentPlayer,
     playerId,
@@ -158,11 +171,11 @@ export const GameStateProvider = ({ children }) => {
         if (!set.complete) {
           set.cards.forEach(card => {
             cardsToSteal.push({
+              ...card,
               owner: {
                 id: player.id,
                 name: player.name,
               },
-              ...card,
             });
           });
         }
@@ -204,6 +217,7 @@ export const GameStateProvider = ({ children }) => {
         gameHasEnded,
         getGameWinner,
         getOtherPlayerIds,
+        getOtherPlayers,
         getOtherPlayerCash,
         getOtherPlayerName,
         getOtherPlayerHand,
@@ -217,6 +231,7 @@ export const GameStateProvider = ({ children }) => {
         getMainPlayerPropertiesInHand,
         getMainPlayerActionsInHand,
         getMainPlayerSets,
+        getMainPlayerCashAndProperties,
         getCardsToSteal,
         getSetsToSteal,
         isMainPlayersTurn,

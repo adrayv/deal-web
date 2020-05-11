@@ -577,14 +577,17 @@ export function reducer(state, action) {
     case actionTypes.transferProperty: {
       const { attackerId, victimId, property } = action.data;
       let newState = Object.assign({}, state);
-      const setToChangeIndex = newState.players[victimId].sets.findIndex(
-        set => !set.complete && set.cards.find(c => c.id === property.id)
+      const setToChangeIndex = newState.players[victimId].sets.findIndex(set =>
+        set.cards.find(c => c.id === property.id)
       );
       const setToChange = newState.players[victimId].sets[setToChangeIndex];
       newState.players[victimId].sets[setToChangeIndex] = {
         ...setToChange,
         cards: setToChange.cards.filter(c => c.id !== property.id),
       };
+      if (newState.players[victimId].sets[setToChangeIndex].complete) {
+        newState.players[victimId].sets[setToChangeIndex].complete = false;
+      }
       // if the card taken was the only card in set
       if (
         newState.players[victimId].sets[setToChangeIndex].cards.length === 0
@@ -888,12 +891,25 @@ export function reducer(state, action) {
           ].cash.filter(c => c.id !== card.id);
         });
         newState.players[playerId].sets.forEach(set => {
-          set.cards.forEach(card => {
-            newState = reducer(
-              newState,
-              actionCreators.transferProperty(lastTask.from, playerId, card)
-            );
-          });
+          if (set.complete) {
+            newState.players[playerId].sets = newState.players[
+              playerId
+            ].sets.filter(s => s.color !== set.color);
+
+            newState.players[lastTask.from].sets.push(set);
+
+            if (playerWon(lastTask.from, newState)) {
+              newState.winner = lastTask.from;
+              newState.status = gameStatuses.done;
+            }
+          } else {
+            set.cards.forEach(card => {
+              newState = reducer(
+                newState,
+                actionCreators.transferProperty(lastTask.from, playerId, card)
+              );
+            });
+          }
         });
         newState.tasks.pop();
       }
