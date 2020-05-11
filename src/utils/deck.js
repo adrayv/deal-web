@@ -1,5 +1,31 @@
 import _ from 'lodash';
 
+export const rentAmounts = {
+  green: [2, 4, 7],
+  black: [1, 2, 3, 4],
+  blue: [3, 8],
+  purple: [1, 2, 4],
+  red: [2, 3, 6],
+  yellow: [2, 4, 6],
+  brown: [1, 2],
+  orange: [1, 3, 5],
+  mint: [1, 2],
+  sky: [1, 2, 3],
+};
+
+export const numToComplete = {
+  purple: 3,
+  green: 3,
+  brown: 2,
+  red: 3,
+  orange: 3,
+  blue: 2,
+  yellow: 3,
+  sky: 3,
+  mint: 2,
+  black: 4,
+};
+
 const types = {
   cash: {
     1: 6,
@@ -17,33 +43,50 @@ const types = {
     count: 2,
     value: 4,
   },
+  rent: {
+    'sky-brown': {
+      value: 1,
+      count: 2,
+      colors: ['sky', 'brown'],
+    },
+    'black-mint': {
+      value: 1,
+      count: 2,
+      colors: ['black', 'mint'],
+    },
+    'blue-green': {
+      value: 1,
+      count: 2,
+      colors: ['blue', 'green'],
+    },
+    'yellow-red': {
+      value: 1,
+      count: 2,
+      colors: ['yellow', 'red'],
+    },
+    'purple-orange': {
+      value: 1,
+      count: 2,
+      colors: ['purple', 'orange'],
+    },
+    any: {
+      value: 3,
+      count: 3,
+      colors: [
+        'purple',
+        'orange',
+        'yellow',
+        'red',
+        'blue',
+        'green',
+        'black',
+        'mint',
+        'sky',
+        'brown',
+      ],
+    },
+  },
   actions: {
-    // rent: {
-    //   'sky-brown': {
-    //     value: 1,
-    //     count: 2,
-    //   },
-    //   'railroad-utility': {
-    //     value: 1,
-    //     count: 2,
-    //   },
-    //   'blue-green': {
-    //     value: 1,
-    //     count: 2,
-    //   },
-    //   'yellow-red': {
-    //     value: 1,
-    //     count: 2,
-    //   },
-    //   'purple-orange': {
-    //     value: 1,
-    //     count: 2,
-    //   },
-    //   any: {
-    //     value: 3,
-    //     count: 3,
-    //   },
-    // },
     dealbreaker: {
       value: 5,
       count: 2,
@@ -200,6 +243,18 @@ export const generateDeck = () => {
             type: 'action',
             value: actionData.value,
             name: actionName,
+          };
+        });
+      });
+    } else if (type === 'rent') {
+      return Object.entries(data).map(([rentName, rentData]) => {
+        return [...new Array(rentData.count)].map((_, i) => {
+          return {
+            id: `rent-${rentName}-${i}`,
+            type: 'rent',
+            value: rentData.value,
+            name: `rent-${rentName}`,
+            colors: rentData.colors,
           };
         });
       });

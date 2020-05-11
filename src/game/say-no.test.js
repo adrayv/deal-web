@@ -552,7 +552,7 @@ test('saying no in a charge chain', () => {
         name: 'player 1',
         properties: [],
         sets: [],
-        cash: [],
+        cash: [{ id: 'cash-val-2-0', type: 'cash', value: 2 }],
         hand: [],
       },
       p2: {

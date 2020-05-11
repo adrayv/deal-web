@@ -5,6 +5,7 @@ import { shuffle } from 'utils/array';
 
 /*
   TODO: 
+  - trying to play a color that you already have a complete set for
   - trying to play card while task is active
   - playing action card as cash
 */

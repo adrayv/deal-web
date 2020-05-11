@@ -1,4 +1,4 @@
-import { generateDeck } from 'utils/deck';
+import { generateDeck, rentAmounts, numToComplete } from 'utils/deck';
 import { shuffle } from 'utils/array';
 
 const config = {
@@ -27,6 +27,8 @@ export const actionTypes = {
     selectPlayerToCharge: '@resolve-select-player-to-charge',
     payCharge: '@resolve-charge',
     goBankrupt: '@resolve-go-bankrupt',
+    selectColorToRent: '@resolve-select-color-to-rent',
+    selectPlayerAndColorToRent: '@resolve-select-player-and-color-to-rent',
   },
   sayNo: '@say-no',
   transferProperty: '@transfer-property',
@@ -123,6 +125,18 @@ export const actionCreators = {
       },
     };
   },
+  resolveSelectColorToRent(attackerId, color) {
+    return {
+      type: actionTypes.resolveTask.selectColorToRent,
+      data: { attackerId, color },
+    };
+  },
+  resolveSelectPlayerAndColorToRent(attackerId, victimId, color) {
+    return {
+      type: actionTypes.resolveTask.selectPlayerAndColorToRent,
+      data: { attackerId, victimId, color },
+    };
+  },
   sayNo(playerId) {
     return {
       type: actionTypes.sayNo,
@@ -176,6 +190,8 @@ export const taskTypes = {
   selectSetToSteal: '@task-select-set-to-steal',
   payCharge: '@task-pay-charge',
   selectPlayerToCharge: '@task-select-player-to-charge',
+  selectColorToRent: '@task-select-color-rent',
+  selectPlayerAndColorToRent: '@task-select-player-and-color',
 };
 
 const taskCreators = {
@@ -245,6 +261,22 @@ const taskCreators = {
       },
     };
   },
+  selectColorToRent(playerId, availableColors) {
+    return {
+      type: taskTypes.selectColorToRent,
+      from: playerId,
+      to: playerId,
+      payload: { availableColors },
+    };
+  },
+  selectPlayerAndColorToRent(playerId, availableColors) {
+    return {
+      type: taskTypes.selectPlayerAndColorToRent,
+      from: playerId,
+      to: playerId,
+      payload: { availableColors },
+    };
+  },
   payCharge(attackerId, victimId, amount) {
     return {
       type: taskTypes.payCharge,
@@ -282,19 +314,6 @@ export function canJoinGame(gameState) {
   );
 }
 
-const numToComplete = {
-  purple: 3,
-  green: 3,
-  brown: 2,
-  red: 3,
-  orange: 3,
-  blue: 2,
-  yellow: 3,
-  sky: 3,
-  mint: 2,
-  black: 4,
-};
-
 function playerWon(playerId, state) {
   const numCompleteSets = state.players[playerId].sets.reduce(
     (numCompleteSets, set) => {
@@ -308,6 +327,10 @@ function playerWon(playerId, state) {
   return numCompleteSets >= 3;
 }
 
+function playerCanPayRent(player) {
+  return player.sets.length > 0 || player.cash.length > 0;
+}
+
 function setIsComplete(set) {
   const numPropertiesInSet = set.cards.reduce((numProperties, card) => {
     if (card.type === 'property') {
@@ -316,6 +339,14 @@ function setIsComplete(set) {
     return numProperties;
   }, 0);
   return numPropertiesInSet === numToComplete[set.color];
+}
+
+function calculateRent(sets, color) {
+  const matchingSets = sets.filter(set => set.color === color);
+  const total = matchingSets.reduce((total, set) => {
+    return total + rentAmounts[color][set.cards.length - 1];
+  }, 0);
+  return total;
 }
 
 export function reducer(state, action) {
@@ -416,7 +447,10 @@ export function reducer(state, action) {
               case 'birthday': {
                 for (let i = 0; i < newState.order.length; i++) {
                   const playerToCharge = newState.order[i];
-                  if (playerToCharge !== playerId) {
+                  if (
+                    playerToCharge !== playerId &&
+                    playerCanPayRent(newState.players[playerToCharge])
+                  ) {
                     newState.tasks.push(
                       taskCreators.payCharge(playerId, playerToCharge, 2)
                     );
@@ -433,6 +467,20 @@ export function reducer(state, action) {
               default: {
                 // continue
               }
+            }
+            break;
+          }
+          case 'rent': {
+            newState.discard.push(card);
+            const { colors, name } = card;
+            if (name === 'rent-any') {
+              newState.tasks.push(
+                taskCreators.selectPlayerAndColorToRent(playerId, colors)
+              );
+            } else {
+              newState.tasks.push(
+                taskCreators.selectColorToRent(playerId, colors)
+              );
             }
             break;
           }
@@ -673,11 +721,68 @@ export function reducer(state, action) {
         lastTask.from === attackerId &&
         lastTask.to === attackerId &&
         lastTask.type === taskTypes.selectPlayerToCharge &&
-        lastTask.payload.amount
+        lastTask.payload.amount &&
+        playerCanPayRent(newState.players[victimId])
       ) {
         newState.tasks.pop();
         newState.tasks.push(
           taskCreators.payCharge(attackerId, victimId, lastTask.payload.amount)
+        );
+      }
+      return newState;
+    }
+    case actionTypes.resolveTask.selectColorToRent: {
+      const newState = Object.assign({}, state);
+      const { attackerId, color } = action.data;
+      const lastTask = newState.tasks[newState.tasks.length - 1];
+      if (
+        lastTask &&
+        lastTask.from === attackerId &&
+        lastTask.to === attackerId &&
+        lastTask.type === taskTypes.selectColorToRent &&
+        newState.players[attackerId].sets.find(set => set.color === color) &&
+        lastTask.payload.availableColors.find(c => c === color)
+      ) {
+        const amountToCharge = calculateRent(
+          newState.players[attackerId].sets,
+          color
+        );
+        newState.tasks.pop();
+        for (let i = 0; i < newState.order.length; i++) {
+          const playerToCharge = newState.order[i];
+          if (
+            playerToCharge !== attackerId &&
+            playerCanPayRent(newState.players[playerToCharge])
+          ) {
+            newState.tasks.push(
+              taskCreators.payCharge(attackerId, playerToCharge, amountToCharge)
+            );
+          }
+        }
+      }
+      return newState;
+    }
+    case actionTypes.resolveTask.selectPlayerAndColorToRent: {
+      const newState = Object.assign({}, state);
+      const { attackerId, victimId, color } = action.data;
+      const lastTask = newState.tasks[newState.tasks.length - 1];
+      if (
+        lastTask &&
+        lastTask.from === attackerId &&
+        lastTask.to === attackerId &&
+        lastTask.type === taskTypes.selectPlayerAndColorToRent &&
+        newState.players[attackerId].sets.find(set => set.color === color) &&
+        victimId !== attackerId &&
+        playerCanPayRent(newState.players[victimId]) &&
+        lastTask.payload.availableColors.find(c => c === color)
+      ) {
+        const amountToCharge = calculateRent(
+          newState.players[attackerId].sets,
+          color
+        );
+        newState.tasks.pop();
+        newState.tasks.push(
+          taskCreators.payCharge(attackerId, victimId, amountToCharge)
         );
       }
       return newState;

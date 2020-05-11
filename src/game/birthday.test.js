@@ -14,7 +14,7 @@ test('playing a birthday card', () => {
         name: 'player 1',
         properties: [],
         sets: [],
-        cash: [],
+        cash: [{ id: 'cash-val-2-0', type: 'cash', value: 2 }],
         hand: [],
       },
       p2: {
@@ -37,7 +37,7 @@ test('playing a birthday card', () => {
         name: 'player 3',
         properties: [],
         sets: [],
-        cash: [],
+        cash: [{ id: 'cash-val-2-0', type: 'cash', value: 2 }],
         hand: [],
       },
     },

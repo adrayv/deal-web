@@ -452,7 +452,7 @@ test('issuing a charge as your last move', () => {
         name: 'player 1',
         properties: [],
         sets: [],
-        cash: [],
+        cash: [{ id: 'cash-val-2-0', type: 'cash', value: 2 }],
         hand: [],
       },
       p2: {
@@ -477,7 +477,7 @@ test('issuing a charge as your last move', () => {
         name: 'player 3',
         properties: [],
         sets: [],
-        cash: [],
+        cash: [{ id: 'cash-val-2-0', type: 'cash', value: 2 }],
         hand: [],
       },
     },
@@ -893,7 +893,7 @@ test('paying with a card the player hasnt played', () => {
         name: 'player 1',
         properties: [],
         sets: [],
-        cash: [],
+        cash: [{ id: 'cash-val-1-0', type: 'cash', value: 1 }],
         hand: [{ id: 'cash-val-2-0', type: 'cash', value: 2 }],
       },
       p2: {
@@ -924,6 +924,8 @@ test('paying with a card the player hasnt played', () => {
   expect(newState.tasks[0].from).toBe('p2');
   expect(newState.tasks[0].type).toBe(taskTypes.payCharge);
   expect(newState.tasks[0].payload.amount).toBe(2);
+  expect(newState.players.p1.cash.length).toBe(1);
+  expect(newState.players.p1.hand.length).toBe(1);
 
   newState = reducer(
     newState,
@@ -932,7 +934,8 @@ test('paying with a card the player hasnt played', () => {
 
   expect(newState.tasks.length).toBe(1);
   expect(newState.cardsPlayed).toBe(1);
-  expect(newState.players.p1.cash.length).toBe(0);
+  expect(newState.players.p1.cash.length).toBe(1);
+  expect(newState.players.p1.hand.length).toBe(1);
   expect(newState.players.p2.cash.length).toBe(0);
   expect(newState.tasks[0].to).toBe('p1');
   expect(newState.tasks[0].from).toBe('p2');
@@ -980,7 +983,7 @@ test('paying a charge when you dont have to', () => {
         name: 'player 3',
         properties: [],
         sets: [],
-        cash: [],
+        cash: [{ id: 'cash-val-1-5', type: 'cash', value: 1 }],
         hand: [],
       },
     },
@@ -1094,4 +1097,68 @@ test('overpaying a charge', () => {
   expect(newState.players.p1.cash.length).toBe(0);
   expect(newState.players.p2.cash.length).toBe(1);
   expect(newState.players.p2.cash[0].id).toBe('cash-val-5-0');
+});
+
+test('charging someone who cant pay rent at all', () => {
+  const state = {
+    turn: 0,
+    status: 'in-progress',
+    cardsPlayed: 0,
+    tasks: [],
+    deck: [],
+    discard: [],
+    players: {
+      p1: {
+        id: 'p1',
+        name: 'player 1',
+        properties: [],
+        sets: [],
+        cash: [
+          { id: 'cash-val-1-4', type: 'cash', value: 1 },
+          { id: 'cash-val-1-5', type: 'cash', value: 1 },
+        ],
+        hand: [],
+      },
+      p2: {
+        id: 'p2',
+        name: 'player 2',
+        properties: [],
+        cash: [],
+        sets: [],
+        hand: [
+          {
+            id: 'action-birthday-0',
+            type: 'action',
+            value: 2,
+            name: 'birthday',
+          },
+        ],
+      },
+      p3: {
+        id: 'p3',
+        name: 'player 3',
+        properties: [],
+        sets: [],
+        cash: [],
+        hand: [],
+      },
+    },
+    order: ['p2', 'p1', 'p3'],
+    winner: null,
+  };
+
+  let newState = reducer(
+    state,
+    actionCreators.playCard('p2', state.players.p2.hand[0])
+  );
+
+  expect(newState.discard.length).toBe(1);
+  expect(newState.discard[0].name).toBe('birthday');
+  expect(newState.cardsPlayed).toBe(1);
+  expect(newState.players.p2.hand.length).toBe(0);
+  expect(newState.tasks.length).toBe(1);
+  expect(newState.tasks[0].to).toBe('p1');
+  expect(newState.tasks[0].from).toBe('p2');
+  expect(newState.tasks[0].type).toBe(taskTypes.payCharge);
+  expect(newState.tasks[0].payload.amount).toBe(2);
 });
