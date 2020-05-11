@@ -135,6 +135,10 @@ export const GameStateProvider = ({ children }) => {
   ]);
   const getMainPlayerSets = useCallback(() => mainPlayerSets, [mainPlayerSets]);
   const getMainPlayerCash = useCallback(() => mainPlayerCash, [mainPlayerCash]);
+  const getMainPlayerCashAndProperties = useCallback(
+    () => [...mainPlayerCash, ...mainPlayerSets.flatMap(set => set.cards)],
+    [mainPlayerCash, mainPlayerSets]
+  );
   const isMainPlayersTurn = useCallback(() => currentPlayer === playerId, [
     currentPlayer,
     playerId,
@@ -217,6 +221,7 @@ export const GameStateProvider = ({ children }) => {
         getMainPlayerPropertiesInHand,
         getMainPlayerActionsInHand,
         getMainPlayerSets,
+        getMainPlayerCashAndProperties,
         getCardsToSteal,
         getSetsToSteal,
         isMainPlayersTurn,
