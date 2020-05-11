@@ -7,6 +7,7 @@ import SelectSetToSteal from 'components/SelectSetToSteal';
 import SurrenderSet from 'components/SurrenderSet';
 import PayCharge from 'components/PayCharge';
 import SelectPlayerToPayDebt from 'components/SelectPlayerToPayDebt';
+import SelectColorToRent from 'components/SelectColorToRent';
 
 export default () => (
   <>
@@ -17,6 +18,7 @@ export default () => (
     <SelectSetToSteal />
     <SurrenderSet />
     <SelectPlayerToPayDebt />
+    <SelectColorToRent />
     <PayCharge />
   </>
 );

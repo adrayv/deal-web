@@ -75,7 +75,9 @@ export const GameStateProvider = ({ children }) => {
   const mainPlayerHandActions =
     mainPlayerHand &&
     mainPlayerHand.filter(
-      card => card.type === 'action' && card.name !== 'say-no'
+      card =>
+        (card.type === 'action' && card.name !== 'say-no') ||
+        card.type === 'rent'
     );
   const mainPlayerSayNos =
     mainPlayerHand && mainPlayerHand.filter(card => card.name === 'say-no');

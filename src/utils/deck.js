@@ -43,49 +43,49 @@ const types = {
     count: 2,
     value: 4,
   },
-  // rent: {
-  //   'sky-brown': {
-  //     value: 1,
-  //     count: 2,
-  //     colors: ['sky', 'brown'],
-  //   },
-  //   'black-mint': {
-  //     value: 1,
-  //     count: 2,
-  //     colors: ['black', 'mint'],
-  //   },
-  //   'blue-green': {
-  //     value: 1,
-  //     count: 2,
-  //     colors: ['blue', 'green'],
-  //   },
-  //   'yellow-red': {
-  //     value: 1,
-  //     count: 2,
-  //     colors: ['yellow', 'red'],
-  //   },
-  //   'purple-orange': {
-  //     value: 1,
-  //     count: 2,
-  //     colors: ['purple', 'orange'],
-  //   },
-  //   any: {
-  //     value: 3,
-  //     count: 3,
-  //     colors: [
-  //       'purple',
-  //       'orange',
-  //       'yellow',
-  //       'red',
-  //       'blue',
-  //       'green',
-  //       'black',
-  //       'mint',
-  //       'sky',
-  //       'brown',
-  //     ],
-  //   },
-  // },
+  rent: {
+    'sky-brown': {
+      value: 1,
+      count: 2,
+      colors: ['sky', 'brown'],
+    },
+    'black-mint': {
+      value: 1,
+      count: 2,
+      colors: ['black', 'mint'],
+    },
+    'blue-green': {
+      value: 1,
+      count: 2,
+      colors: ['blue', 'green'],
+    },
+    'yellow-red': {
+      value: 1,
+      count: 2,
+      colors: ['yellow', 'red'],
+    },
+    'purple-orange': {
+      value: 1,
+      count: 2,
+      colors: ['purple', 'orange'],
+    },
+    any: {
+      value: 3,
+      count: 3,
+      colors: [
+        'purple',
+        'orange',
+        'yellow',
+        'red',
+        'blue',
+        'green',
+        'black',
+        'mint',
+        'sky',
+        'brown',
+      ],
+    },
+  },
   actions: {
     dealbreaker: {
       value: 5,

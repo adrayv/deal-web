@@ -5,6 +5,7 @@ import CashCard from 'components/CashCard';
 import PropertyCard from 'components/PropertyCard';
 import SetCard from 'components/SetCard';
 import ActionCard from 'components/ActionCard';
+import RentCard from 'components/RentCard';
 
 const Layout = styled.div`
   & > * {
@@ -32,6 +33,14 @@ export default ({ title, cards }) => (
           );
         } else if (card.type === 'action') {
           return <ActionCard name={card.name} value={card.value} />;
+        } else if (card.type === 'rent') {
+          return (
+            <RentCard
+              name={card.name}
+              value={card.value}
+              colors={card.colors}
+            />
+          );
         } else {
           return (
             <SetCard
